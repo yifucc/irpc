@@ -13,6 +13,8 @@
         <java.version>1.8</java.version>
         <zk.version>3.6.1</zk.version>
         <lombok.version>1.16.18</lombok.version>
+        <guava.version>20.0</guava.version>
+        <commonsLang3.version>3.9</commonsLang3.version>
     </properties>
 
     <dependencyManagement>
@@ -53,6 +55,19 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
+        </dependency>
+
+        <!-- guava-->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${commonsLang3.version}</version>
         </dependency>
 
     </dependencies>

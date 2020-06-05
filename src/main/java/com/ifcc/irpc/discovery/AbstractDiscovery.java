@@ -6,7 +6,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 /**
  * @author chenghaifeng
  * @date 2020-06-05
- * @description
+ * @description 服务发现器抽象类
  */
 public abstract class AbstractDiscovery implements Discovery{
 

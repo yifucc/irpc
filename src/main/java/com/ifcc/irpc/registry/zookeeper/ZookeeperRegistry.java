@@ -48,7 +48,8 @@ public class ZookeeperRegistry implements Registry, AsyncCallback.StringCallback
     public void processResult(int rc, String path, Object ctx, String name) {
         switch (KeeperException.Code.get(rc)) {
             case OK:
-                return;
+            case NODEEXISTS:
+                break;
             case OPERATIONTIMEOUT:
             case CONNECTIONLOSS:
                 log.error("[ZookeeperRegistry] Zookeeper register service failed, error code: {}, msg: {}", rc, KeeperException.Code.get(rc).toString());
@@ -60,8 +61,8 @@ public class ZookeeperRegistry implements Registry, AsyncCallback.StringCallback
                     log.error("[ZookeeperRegistry] Zookeeper register service failed.", e);
                 }
                 break;
-            case NODEEXISTS:
             default:
+                log.error("[ZookeeperRegistry] Zookeeper register service failed, error code: {}, msg: {}", rc, KeeperException.Code.get(rc).toString());
                 break;
         }
     }

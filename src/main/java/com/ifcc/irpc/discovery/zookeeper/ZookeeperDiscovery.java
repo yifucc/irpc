@@ -57,6 +57,9 @@ public class ZookeeperDiscovery extends AbstractDiscovery implements AsyncCallba
                 if (children != null) {
                     this.serverAddress().addAll(children);
                 }
+                if (children == null || children.isEmpty()) {
+                    log.error("[ZookeeperDiscovery] There is no available service provider.");
+                }
                 try {
                     ZooKeeper zk = zookeeperBuilder.zkCli();
                     DiscoveryContext context = (DiscoveryContext) ctx;
