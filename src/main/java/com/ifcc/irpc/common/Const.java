@@ -6,7 +6,7 @@ package com.ifcc.irpc.common;
  * @description 常量
  */
 public class Const {
-    // ============== zk相关常量 =============
+    // ================= zk相关常量 ================
     /**
      * 连接zk超时时间
      */
@@ -24,5 +24,13 @@ public class Const {
      */
     public static final String ZK_CONSUMERS_PATH = "/consumers";
 
-    public static final String DIAGONAL="/";
+    // ================== 符号相关 ==================
+    /**
+     * 斜杆
+     */
+    public static final String DIAGONAL = "/";
+    /**
+     * 冒号
+     */
+    public static final String COLON = ":";
 }

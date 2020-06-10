@@ -11,8 +11,10 @@ import lombok.Data;
 public class RegistryContext {
     private String service;
     private String url;
+    private Boolean hasWatched;
     public RegistryContext(String service, String url) {
         this.service = service;
         this.url = url;
+        this.hasWatched = false;
     }
 }

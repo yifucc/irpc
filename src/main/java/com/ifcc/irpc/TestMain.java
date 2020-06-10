@@ -18,7 +18,7 @@ public class TestMain {
             RegistryContext ctx2 = new RegistryContext("ifcc.service.test", "10.101.23.4:9090");
             registry.register(ctx);
             registry.register(ctx2);
-            Thread.sleep(100000);
+            Thread.sleep(200000);
         } catch (Exception e) {
             e.printStackTrace();
         }

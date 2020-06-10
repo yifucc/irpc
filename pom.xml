@@ -15,6 +15,7 @@
         <lombok.version>1.16.18</lombok.version>
         <guava.version>20.0</guava.version>
         <commonsLang3.version>3.9</commonsLang3.version>
+        <jetcd.version>0.5.0</jetcd.version>
     </properties>
 
     <dependencyManagement>
@@ -68,6 +69,12 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>${commonsLang3.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.etcd</groupId>
+            <artifactId>jetcd-core</artifactId>
+            <version>${jetcd.version}</version>
         </dependency>
 
     </dependencies>
