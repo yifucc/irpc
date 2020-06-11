@@ -32,10 +32,12 @@ public class EtcdBuilder {
     }
 
     public Client EtcdCli() {
-        if(this.etcd != null && isConnected()) {
-            return this.etcd;
+        synchronized (EtcdBuilder.class) {
+            if(this.etcd != null && isConnected()) {
+                return this.etcd;
+            }
+            return connectEtcd();
         }
-        return connectEtcd();
     }
 
     public long leaseId() {
