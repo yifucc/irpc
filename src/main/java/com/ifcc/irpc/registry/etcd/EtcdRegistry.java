@@ -40,7 +40,6 @@ public class EtcdRegistry implements Registry {
             CompletableFuture<PutResponse> future = kv.put(ByteSequence.from(key, Charset.forName("utf-8")), ByteSequence.EMPTY, PutOption.newBuilder().withLeaseId(etcdBuilder.leaseId()).build());
             future.handleAsync(
                 (PutResponse putResponse, Throwable throwable) -> {
-                    System.out.println(putResponse);
                     if (throwable != null) {
                         try {
                             register(ctx);
@@ -67,7 +66,6 @@ public class EtcdRegistry implements Registry {
         watch.watch(ByteSequence.from(key, Charset.forName("utf-8")),
                 response -> {
             for (WatchEvent event : response.getEvents()) {
-                System.out.println(event.getEventType());
                 if (WatchEvent.EventType.DELETE == event.getEventType()) {
                     try {
                         register(ctx);
