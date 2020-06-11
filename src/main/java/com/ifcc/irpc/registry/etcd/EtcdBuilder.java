@@ -1,14 +1,10 @@
 package com.ifcc.irpc.registry.etcd;
 
 import io.etcd.jetcd.Client;
-import io.etcd.jetcd.CloseableClient;
 import io.etcd.jetcd.Lease;
 import io.etcd.jetcd.lease.LeaseKeepAliveResponse;
-import io.etcd.jetcd.options.LeaseOption;
 import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.concurrent.Executors;
 
 /**
  * @author chenghaifeng
@@ -26,13 +22,13 @@ public class EtcdBuilder {
 
     private long leaseId;
 
-    private String status;
+    private EtcdStatus status;
 
 
 
     public EtcdBuilder(String registryAddress) {
         this.registryAddress = registryAddress;
-        this.status = "NOT_CONNECTED";
+        this.status = EtcdStatus.NOT_CONNECTED;
     }
 
     public Client EtcdCli() {
@@ -52,15 +48,15 @@ public class EtcdBuilder {
         try {
             this.leaseId = lease.grant(10).get().getID();
         } catch (Exception e) {
-            
+            log.error("", e);
         }
         this.keepAlive();
-        this.status = "CONNECTED";
+        this.status = EtcdStatus.CONNECTED;
         return this.etcd;
     }
 
     public boolean isConnected() {
-        return "CONNECTED".equals(this.status);
+        return EtcdStatus.CONNECTED.equals(this.status);
     }
 
     private void keepAlive() {
@@ -72,7 +68,6 @@ public class EtcdBuilder {
                  */
                 @Override
                 public void onNext(LeaseKeepAliveResponse leaseKeepAliveResponse) {
-                    log.info("续约");
                 }
 
                 /**
@@ -81,8 +76,8 @@ public class EtcdBuilder {
                  */
                 @Override
                 public void onError(Throwable throwable) {
-                    log.error("发生异常");
-                    status = "EXCEPTION";
+                    log.error("[EtcdBuilder] Etcd client keepAlive error.", throwable);
+                    status = EtcdStatus.EXCEPTION;
                 }
 
                 /**
@@ -90,12 +85,31 @@ public class EtcdBuilder {
                  */
                 @Override
                 public void onCompleted() {
-                    log.error("租约过期");
-                    status = "EXPIRED";
+                    log.error("[EtcdBuilder] Etcd client lease has expired.");
+                    status = EtcdStatus.EXPIRED;
                 }
             });
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    public enum EtcdStatus {
+        /**
+         * 未连接
+         */
+        NOT_CONNECTED,
+        /**
+         * 已连接
+         */
+        CONNECTED,
+        /**
+         * 异常
+         */
+        EXCEPTION,
+        /**
+         * 租约过期
+         */
+        EXPIRED;
     }
 }

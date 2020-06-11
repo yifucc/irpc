@@ -1,5 +1,6 @@
 package com.ifcc.irpc.registry.etcd;
 
+import com.ifcc.irpc.common.Const;
 import com.ifcc.irpc.exceptions.RegistryServiceFailedException;
 import com.ifcc.irpc.registry.Registry;
 import com.ifcc.irpc.registry.RegistryContext;
@@ -33,14 +34,13 @@ public class EtcdRegistry implements Registry {
     @Override
     public void register(RegistryContext ctx) throws RegistryServiceFailedException {
         Client etcd = etcdBuilder.EtcdCli();
-        String key = MessageFormat.format("/{0}/{1}/{2}", "test", "a", "b");
+        String key = MessageFormat.format("{0}/{1}{2}/{3}", Const.ZK_REGISTRY_PATH, ctx.getService(), Const.ZK_PROVIDERS_PATH, ctx.getUrl());
         try {
             KV kv = etcd.getKVClient();
-            CompletableFuture<PutResponse> future = kv.put(ByteSequence.from(key, Charset.forName("utf-8")),
-                    ByteSequence.EMPTY,
-                    PutOption.newBuilder().withLeaseId(etcdBuilder.leaseId()).withPrevKV().build());
+            CompletableFuture<PutResponse> future = kv.put(ByteSequence.from(key, Charset.forName("utf-8")), ByteSequence.EMPTY, PutOption.newBuilder().withLeaseId(etcdBuilder.leaseId()).build());
             future.handleAsync(
                 (PutResponse putResponse, Throwable throwable) -> {
+                    System.out.println(putResponse);
                     if (throwable != null) {
                         try {
                             register(ctx);
@@ -57,7 +57,7 @@ public class EtcdRegistry implements Registry {
                 watch(key, ctx);
             }
         } catch (Exception e) {
-            log.error("", e);
+            throw new RegistryServiceFailedException("[EtcdRegistry] Etcd register service failed.", e);
         }
     }
 
@@ -71,6 +71,7 @@ public class EtcdRegistry implements Registry {
                 if (WatchEvent.EventType.DELETE == event.getEventType()) {
                     try {
                         register(ctx);
+                        break;
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
