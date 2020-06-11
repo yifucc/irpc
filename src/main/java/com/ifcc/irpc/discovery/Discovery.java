@@ -2,6 +2,8 @@ package com.ifcc.irpc.discovery;
 
 import com.ifcc.irpc.exceptions.DiscoveryServiceFailedException;
 
+import java.util.List;
+
 /**
  * @author chenghaifeng
  * @date 2020-06-04
@@ -9,4 +11,6 @@ import com.ifcc.irpc.exceptions.DiscoveryServiceFailedException;
  */
 public interface Discovery {
     void discover(DiscoveryContext ctx) throws DiscoveryServiceFailedException;
+
+    List<String> serverAddress();
 }

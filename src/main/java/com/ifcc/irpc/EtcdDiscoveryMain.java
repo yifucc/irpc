@@ -1,5 +1,7 @@
 package com.ifcc.irpc;
 
+import com.ifcc.irpc.discovery.AbstractDiscovery;
+import com.ifcc.irpc.discovery.Discovery;
 import com.ifcc.irpc.discovery.DiscoveryContext;
 import com.ifcc.irpc.discovery.etcd.EtcdDiscovery;
 import com.ifcc.irpc.registry.etcd.EtcdBuilder;
@@ -15,7 +17,7 @@ public class EtcdDiscoveryMain {
     public static void main(String[] args) {
         EtcdBuilder builder = new EtcdBuilder("http://106.13.230.240:2379");
         try {
-            EtcdDiscovery discovery = new EtcdDiscovery(builder);
+            AbstractDiscovery discovery = new EtcdDiscovery(builder);
             discovery.discover(new DiscoveryContext("com.ifcc.test", LocalIpUtil.localRealIp()));
             new Runnable() {
 

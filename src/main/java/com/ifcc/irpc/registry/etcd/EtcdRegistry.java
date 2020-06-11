@@ -42,12 +42,13 @@ public class EtcdRegistry implements Registry {
                 (PutResponse putResponse, Throwable throwable) -> {
                     if (throwable != null) {
                         try {
-                            register(ctx);
                             Thread.sleep(10000);
+                            register(ctx);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
                     }
+                    log.info("[EtcdRegistry] service: {} registered to etcd successfully.", ctx.getService());
                     return putResponse;
                 }
             );

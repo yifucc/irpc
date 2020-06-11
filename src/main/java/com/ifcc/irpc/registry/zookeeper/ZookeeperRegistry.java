@@ -86,18 +86,20 @@ public class ZookeeperRegistry implements Registry, AsyncCallback.StringCallback
 
     @Override
     public void processResult(int rc, String path, Object ctx, String name) {
+        RegistryContext context = (RegistryContext) ctx;
         switch (KeeperException.Code.get(rc)) {
             case OK:
+                log.info("[ZookeeperRegistry] service: {} registered to zookeeper successfully.", context.getService());
+                break;
             case NODEEXISTS:
                 break;
             case OPERATIONTIMEOUT:
             case CONNECTIONLOSS:
             default:
                 log.error("[ZookeeperRegistry] Zookeeper register service failed, error code: {}, msg: {}", rc, KeeperException.Code.get(rc).toString());
-                RegistryContext context = (RegistryContext) ctx;
                 try {
+                    Thread.sleep(10000);
                     this.register(context);
-                    Thread.sleep(100000);
                 } catch (Exception e) {
                     log.error("[ZookeeperRegistry] Zookeeper register service failed.", e);
                 }

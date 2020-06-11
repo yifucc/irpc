@@ -12,6 +12,7 @@ import io.etcd.jetcd.KeyValue;
 import io.etcd.jetcd.Watch;
 import io.etcd.jetcd.kv.GetResponse;
 import io.etcd.jetcd.options.GetOption;
+import io.etcd.jetcd.options.PutOption;
 import io.etcd.jetcd.options.WatchOption;
 import lombok.extern.slf4j.Slf4j;
 
@@ -45,8 +46,8 @@ public class EtcdDiscovery extends AbstractDiscovery {
                     (GetResponse getResponse, Throwable throwable) -> {
                         if (throwable != null) {
                             try {
-                                discover(ctx);
                                 Thread.sleep(10000);
+                                discover(ctx);
                                 return null;
                             } catch (Exception e) {
                                 e.printStackTrace();
@@ -64,7 +65,7 @@ public class EtcdDiscovery extends AbstractDiscovery {
                 watch(key, ctx);
             }
             String consumerKey = MessageFormat.format("{0}/{1}{2}/{3}", Const.ZK_REGISTRY_PATH, ctx.getService(), Const.ZK_CONSUMERS_PATH, ctx.getIp());
-            kv.put(ByteSequence.from(consumerKey, Charset.forName("utf-8")), ByteSequence.EMPTY);
+            kv.put(ByteSequence.from(consumerKey, Charset.forName("utf-8")), ByteSequence.EMPTY, PutOption.newBuilder().withLeaseId(builder.leaseId()).build());
 
         } catch (Exception e) {
             throw new DiscoveryServiceFailedException("[EtcdDiscovery] Etcd discovery service failed.", e);
