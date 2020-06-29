@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option java_package = "com.ifcc.irpc.codec.serialization.protocol";
+option java_outer_classname = "IrpcProtocol";
+
+message Request {
+    string  service_path = 1;          // 请求服务路径
+    map<string, bytes> metadata = 2;  // 透传的数据
+    bytes payload = 3;               // 请求体
+}
+
+message Response {
+    uint32 code = 1;                 // 返回码 0-正常 非0-错误
+    string msg = 2;                 // 返回消息，OK-正常，错误会提示详情
+    map<string, bytes> metadata = 3;   // 透传的数据
+    bytes payload = 4;                 // 返回体
+}
+

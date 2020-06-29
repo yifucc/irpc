@@ -19,9 +19,4 @@ public abstract class AbstractDiscovery implements Discovery{
     public AbstractDiscovery() {
         this.serverAddressList = new CopyOnWriteArrayList<>();
     }
-
-    @Override
-    public List<String> serverAddress() {
-        return this.serverAddressList;
-    }
 }

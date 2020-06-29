@@ -1,6 +1,5 @@
 package com.ifcc.irpc;
 
-import com.ifcc.irpc.discovery.AbstractDiscovery;
 import com.ifcc.irpc.discovery.Discovery;
 import com.ifcc.irpc.discovery.DiscoveryContext;
 import com.ifcc.irpc.discovery.etcd.EtcdDiscovery;
@@ -17,8 +16,11 @@ public class EtcdDiscoveryMain {
     public static void main(String[] args) {
         EtcdBuilder builder = new EtcdBuilder("http://106.13.230.240:2379");
         try {
-            AbstractDiscovery discovery = new EtcdDiscovery(builder);
-            discovery.discover(new DiscoveryContext("com.ifcc.test", LocalIpUtil.localRealIp()));
+            Discovery discovery = new EtcdDiscovery(builder);
+            DiscoveryContext ctx = new DiscoveryContext("com.ifcc.test", LocalIpUtil.localRealIp());
+            DiscoveryContext ctx2 = new DiscoveryContext("com.ifcc.test2", LocalIpUtil.localRealIp());
+            discovery.discover(ctx);
+            discovery.discover(ctx2);
             new Runnable() {
 
                 @SneakyThrows
@@ -29,7 +31,8 @@ public class EtcdDiscoveryMain {
                         if (time > 10000) {
                             break;
                         }
-                        System.out.println(discovery.serverAddress());
+                        System.out.println(ctx.getServerAddressList());
+                        System.out.println(ctx2.getServerAddressList());
                         time++;
                         Thread.sleep(5000);
                     }

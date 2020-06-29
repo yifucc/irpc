@@ -1,7 +1,7 @@
 package com.ifcc.irpc.discovery.etcd;
 
 import com.ifcc.irpc.common.Const;
-import com.ifcc.irpc.discovery.AbstractDiscovery;
+import com.ifcc.irpc.discovery.Discovery;
 import com.ifcc.irpc.discovery.DiscoveryContext;
 import com.ifcc.irpc.exceptions.DiscoveryServiceFailedException;
 import com.ifcc.irpc.registry.etcd.EtcdBuilder;
@@ -26,14 +26,15 @@ import java.util.concurrent.CompletableFuture;
  * @description etcd实现的发现器
  */
 @Slf4j
-public class EtcdDiscovery extends AbstractDiscovery {
+public class EtcdDiscovery implements Discovery {
 
     private EtcdBuilder builder;
 
     public EtcdDiscovery(EtcdBuilder builder) {
-        super();
         this.builder = builder;
     }
+
+    public EtcdDiscovery() {}
 
     @Override
     public void discover(DiscoveryContext ctx) throws DiscoveryServiceFailedException {
@@ -53,10 +54,10 @@ public class EtcdDiscovery extends AbstractDiscovery {
                                 e.printStackTrace();
                             }
                         }
-                        this.serverAddress().clear();
+                        ctx.getServerAddressList().clear();
                         for (KeyValue keyValue : getResponse.getKvs()) {
                             String addr = keyValue.getKey().toString(Charset.forName("utf-8")).replace(key, "");
-                            this.serverAddress().add(addr);
+                            ctx.getServerAddressList().add(addr);
                         }
                         return getResponse;
                     }

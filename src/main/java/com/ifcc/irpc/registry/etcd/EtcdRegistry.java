@@ -31,6 +31,8 @@ public class EtcdRegistry implements Registry {
         this.etcdBuilder = etcdBuilder;
     }
 
+    public EtcdRegistry() {}
+
     @Override
     public void register(RegistryContext ctx) throws RegistryServiceFailedException {
         Client etcd = etcdBuilder.EtcdCli();

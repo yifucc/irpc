@@ -24,8 +24,6 @@ public class EtcdBuilder {
 
     private EtcdStatus status;
 
-
-
     public EtcdBuilder(String registryAddress) {
         this.registryAddress = registryAddress;
         this.status = EtcdStatus.NOT_CONNECTED;
@@ -112,6 +110,6 @@ public class EtcdBuilder {
         /**
          * 租约过期
          */
-        EXPIRED;
+        EXPIRED
     }
 }

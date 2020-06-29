@@ -17,6 +17,8 @@ public class EtcdMain {
         try {
             registry.register(new RegistryContext("com.ifcc.test", "10.23.4.23:2323"));
             registry.register(new RegistryContext("com.ifcc.test", "10.23.4.24:2323"));
+            registry.register(new RegistryContext("com.ifcc.test2", "10.23.4.25:2323"));
+            registry.register(new RegistryContext("com.ifcc.test2", "10.23.4.26:2323"));
             Thread.sleep(100000);
         } catch (Exception e) {
             e.printStackTrace();

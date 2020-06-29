@@ -1,0 +1,2 @@
+zookeeper=com.ifcc.irpc.registry.zookeeper.ZookeeperRegistry
+etcd=com.ifcc.irpc.registry.etcd.EtcdRegistry

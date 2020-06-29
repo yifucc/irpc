@@ -4,6 +4,7 @@ import com.ifcc.irpc.common.Const;
 import com.ifcc.irpc.exceptions.RegistryServiceFailedException;
 import com.ifcc.irpc.registry.Registry;
 import com.ifcc.irpc.registry.RegistryContext;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.zookeeper.AsyncCallback;
 import org.apache.zookeeper.CreateMode;
@@ -19,6 +20,7 @@ import org.apache.zookeeper.data.Stat;
  * @description zk实现的注册器
  */
 @Slf4j
+@NoArgsConstructor
 public class ZookeeperRegistry implements Registry, AsyncCallback.StringCallback {
 
     private ZookeeperBuilder zookeeperBuilder;

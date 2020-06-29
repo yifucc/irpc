@@ -19,6 +19,7 @@ public class DiscoveryMain {
         ZookeeperDiscovery discovery = new ZookeeperDiscovery(builder);
         System.out.println(LocalIpUtil.localRealIp());
         DiscoveryContext ctx = new DiscoveryContext("ifcc.service.test", LocalIpUtil.localRealIp());
+        DiscoveryContext ctx2 = new DiscoveryContext("ifcc.irpc.test", LocalIpUtil.localRealIp());
 //        try {
             discovery.discover(ctx);
             new Runnable() {
@@ -31,13 +32,14 @@ public class DiscoveryMain {
                         if (time > 10000) {
                             break;
                         }
-                        System.out.println(discovery.serverAddress());
+                        System.out.println(ctx.getServerAddressList());
+                        System.out.println(ctx2.getServerAddressList());
                         time++;
                         Thread.sleep(5000);
                     }
                 }
             }.run();
-            System.out.println(discovery.serverAddress());
+            System.out.println(ctx.getServerAddressList());
             Thread.sleep(100000);
 //        } catch (Exception e) {
 //            e.printStackTrace();
