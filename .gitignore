@@ -2,10 +2,7 @@ asspath
 .classpath
 .project
 .settings/
-D:\\TransferLog\\auth.log
-D:\\TransferLog\\transfer.log
 bin/
-exception.log
 src/main/webapp/WEB-INF/classes/
 src/main/webapp/WEB-INF/lib/
 target/
@@ -13,15 +10,10 @@ target/
 log/
 logs/
 *.log
-auth.log
-billexception.log
-transfer.log
-*.log
 transfer.log.*
 .tomcatplugin
 *.iml
 .idea
 .mymetadata
-META-INF/
 *compressed
 *.http
