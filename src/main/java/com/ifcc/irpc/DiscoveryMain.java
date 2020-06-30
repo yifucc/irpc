@@ -3,7 +3,7 @@ package com.ifcc.irpc;
 import com.ifcc.irpc.discovery.DiscoveryContext;
 import com.ifcc.irpc.discovery.zookeeper.ZookeeperDiscovery;
 import com.ifcc.irpc.exceptions.DiscoveryServiceFailedException;
-import com.ifcc.irpc.registry.zookeeper.ZookeeperBuilder;
+import com.ifcc.irpc.registry.zookeeper.ZookeeperBuilderImpl;
 import com.ifcc.irpc.utils.LocalIpUtil;
 import lombok.SneakyThrows;
 
@@ -15,7 +15,7 @@ import lombok.SneakyThrows;
 public class DiscoveryMain {
 
     public static void main(String[] args) throws DiscoveryServiceFailedException, InterruptedException {
-        ZookeeperBuilder builder = new ZookeeperBuilder("106.13.230.240:2181");
+        ZookeeperBuilderImpl builder = new ZookeeperBuilderImpl("106.13.230.240:2181");
         ZookeeperDiscovery discovery = new ZookeeperDiscovery(builder);
         System.out.println(LocalIpUtil.localRealIp());
         DiscoveryContext ctx = new DiscoveryContext("ifcc.service.test", LocalIpUtil.localRealIp());

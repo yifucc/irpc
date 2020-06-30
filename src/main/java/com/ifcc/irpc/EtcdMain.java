@@ -1,7 +1,7 @@
 package com.ifcc.irpc;
 
 import com.ifcc.irpc.registry.RegistryContext;
-import com.ifcc.irpc.registry.etcd.EtcdBuilder;
+import com.ifcc.irpc.registry.etcd.EtcdBuilderImpl;
 import com.ifcc.irpc.registry.etcd.EtcdRegistry;
 
 /**
@@ -12,7 +12,7 @@ import com.ifcc.irpc.registry.etcd.EtcdRegistry;
 public class EtcdMain {
 
     public static void main(String[] args) {
-        EtcdBuilder builder = new EtcdBuilder("http://106.13.230.240:2379");
+        EtcdBuilderImpl builder = new EtcdBuilderImpl("http://106.13.230.240:2379");
         EtcdRegistry registry = new EtcdRegistry(builder);
         try {
             registry.register(new RegistryContext("com.ifcc.test", "10.23.4.23:2323"));

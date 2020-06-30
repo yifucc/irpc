@@ -1,4 +1,4 @@
-package com.ifcc.irpc.common;
+package com.ifcc.irpc.common.config;
 
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,7 +18,7 @@ public class Config {
      * 默认20080
      */
     @Value("${irpc.server.port:20080}")
-    private String port;
+    private int port;
 
     /**
      * 可提供的最大连接数
@@ -40,4 +40,14 @@ public class Config {
      */
     @Value("${irpc.client.timeout:2000}")
     private int timeout;
+
+    /**
+     * 注册中心 zookeeper etcd
+     */
+    private String registry;
+
+    /**
+     * 注册中心地址
+     */
+    private String registryAddress;
 }

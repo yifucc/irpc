@@ -3,7 +3,7 @@ package com.ifcc.irpc;
 import com.ifcc.irpc.discovery.Discovery;
 import com.ifcc.irpc.discovery.DiscoveryContext;
 import com.ifcc.irpc.discovery.etcd.EtcdDiscovery;
-import com.ifcc.irpc.registry.etcd.EtcdBuilder;
+import com.ifcc.irpc.registry.etcd.EtcdBuilderImpl;
 import com.ifcc.irpc.utils.LocalIpUtil;
 import lombok.SneakyThrows;
 
@@ -14,11 +14,11 @@ import lombok.SneakyThrows;
  */
 public class EtcdDiscoveryMain {
     public static void main(String[] args) {
-        EtcdBuilder builder = new EtcdBuilder("http://106.13.230.240:2379");
+        EtcdBuilderImpl builder = new EtcdBuilderImpl("http://106.13.230.240:2379");
         try {
             Discovery discovery = new EtcdDiscovery(builder);
             DiscoveryContext ctx = new DiscoveryContext("com.ifcc.test", LocalIpUtil.localRealIp());
-            DiscoveryContext ctx2 = new DiscoveryContext("com.ifcc.test2", LocalIpUtil.localRealIp());
+            DiscoveryContext ctx2 = new DiscoveryContext("ifcc.service.test", LocalIpUtil.localRealIp());
             discovery.discover(ctx);
             discovery.discover(ctx2);
             new Runnable() {

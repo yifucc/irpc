@@ -5,6 +5,7 @@ import com.ifcc.irpc.discovery.Discovery;
 import com.ifcc.irpc.discovery.DiscoveryContext;
 import com.ifcc.irpc.exceptions.DiscoveryServiceFailedException;
 import com.ifcc.irpc.registry.zookeeper.ZookeeperBuilder;
+import com.ifcc.irpc.spi.annotation.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.zookeeper.AsyncCallback;
 import org.apache.zookeeper.CreateMode;
@@ -23,6 +24,7 @@ import java.util.List;
 @Slf4j
 public class ZookeeperDiscovery implements Discovery, AsyncCallback.ChildrenCallback {
 
+    @Inject
     private ZookeeperBuilder zookeeperBuilder;
 
     public ZookeeperDiscovery(ZookeeperBuilder zookeeperBuilder) {

@@ -4,6 +4,7 @@ import com.ifcc.irpc.common.Const;
 import com.ifcc.irpc.exceptions.RegistryServiceFailedException;
 import com.ifcc.irpc.registry.Registry;
 import com.ifcc.irpc.registry.RegistryContext;
+import com.ifcc.irpc.spi.annotation.Inject;
 import io.etcd.jetcd.ByteSequence;
 import io.etcd.jetcd.Client;
 import io.etcd.jetcd.KV;
@@ -25,6 +26,7 @@ import java.util.concurrent.CompletableFuture;
 @Slf4j
 public class EtcdRegistry implements Registry {
 
+    @Inject
     private EtcdBuilder etcdBuilder;
 
     public EtcdRegistry(EtcdBuilder etcdBuilder) {
@@ -35,7 +37,7 @@ public class EtcdRegistry implements Registry {
 
     @Override
     public void register(RegistryContext ctx) throws RegistryServiceFailedException {
-        Client etcd = etcdBuilder.EtcdCli();
+        Client etcd = etcdBuilder.etcdCli();
         String key = MessageFormat.format("{0}/{1}{2}/{3}", Const.ZK_REGISTRY_PATH, ctx.getService(), Const.ZK_PROVIDERS_PATH, ctx.getUrl());
         try {
             KV kv = etcd.getKVClient();
@@ -64,7 +66,7 @@ public class EtcdRegistry implements Registry {
     }
 
     private void watch(String key, RegistryContext ctx) {
-        Client etcd = etcdBuilder.EtcdCli();
+        Client etcd = etcdBuilder.etcdCli();
         Watch watch = etcd.getWatchClient();
         watch.watch(ByteSequence.from(key, Charset.forName("utf-8")),
                 response -> {

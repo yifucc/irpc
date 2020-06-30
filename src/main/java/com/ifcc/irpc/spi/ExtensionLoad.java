@@ -1,10 +1,13 @@
 package com.ifcc.irpc.spi;
 
+import com.ifcc.irpc.spi.annotation.Config;
+import com.ifcc.irpc.spi.annotation.Inject;
 import com.ifcc.irpc.spi.annotation.SPI;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
@@ -86,17 +89,52 @@ public class ExtensionLoad<T> {
     }
 
     private T createExtension(String name) {
-        if (this.extensionClasses.isEmpty()) {
-            loadExtensionClass();
-        }
-        Class<?> clazz = this.extensionClasses.get(name);
+        Class<?> clazz = this.getExtensionClasses().get(name);
         try {
             T instance = (T)clazz.newInstance();
+            // 依赖注入
+            instance = injectExtension(instance);
             instances.put(name, instance);
             return instance;
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    private T injectExtension(T instance) {
+        if(instance == null) {
+            return instance;
+        }
+        try {
+            Field[] fields = instance.getClass().getDeclaredFields();
+            for (Field field : fields) {
+                Inject inject = field.getAnnotation(Inject.class);
+                Config config = field.getAnnotation(Config.class);
+                if (inject != null) {
+                    Object injectValue = null;
+                    if (StringUtils.isNotBlank(inject.value())) {
+                        injectValue = ExtensionFactory.getExtension(field.getType(), inject.value());
+                    } else {
+                        injectValue = ExtensionFactory.getExtension(field.getType());
+                    }
+                    field.setAccessible(true);
+                    if (injectValue != null) {
+                        field.set(instance, injectValue);
+                    }
+                }
+                if (config != null) {
+                    String value = ExtensionFactory.getSpiContext().getCustomConfig().get(config.value());
+                    if (StringUtils.isBlank(value) && config.required()) {
+                        throw new IllegalStateException("The config cannot be empty: " + config.value());
+                    }
+                    field.setAccessible(true);
+                    field.set(instance, value);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return instance;
     }
 
     private Map<String, Class<?>> getExtensionClasses() {

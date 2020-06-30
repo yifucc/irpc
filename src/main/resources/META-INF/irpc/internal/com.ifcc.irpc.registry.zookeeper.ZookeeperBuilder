@@ -1,0 +1,1 @@
+zkBuilder=com.ifcc.irpc.registry.zookeeper.ZookeeperBuilderImpl

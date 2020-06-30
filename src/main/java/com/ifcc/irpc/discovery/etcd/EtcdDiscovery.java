@@ -5,6 +5,7 @@ import com.ifcc.irpc.discovery.Discovery;
 import com.ifcc.irpc.discovery.DiscoveryContext;
 import com.ifcc.irpc.exceptions.DiscoveryServiceFailedException;
 import com.ifcc.irpc.registry.etcd.EtcdBuilder;
+import com.ifcc.irpc.spi.annotation.Inject;
 import io.etcd.jetcd.ByteSequence;
 import io.etcd.jetcd.Client;
 import io.etcd.jetcd.KV;
@@ -28,6 +29,7 @@ import java.util.concurrent.CompletableFuture;
 @Slf4j
 public class EtcdDiscovery implements Discovery {
 
+    @Inject
     private EtcdBuilder builder;
 
     public EtcdDiscovery(EtcdBuilder builder) {
@@ -39,7 +41,7 @@ public class EtcdDiscovery implements Discovery {
     @Override
     public void discover(DiscoveryContext ctx) throws DiscoveryServiceFailedException {
         try {
-            Client etcd = builder.EtcdCli();
+            Client etcd = builder.etcdCli();
             KV kv = etcd.getKVClient();
             String key = MessageFormat.format("{0}/{1}{2}/", Const.ZK_REGISTRY_PATH, ctx.getService(), Const.ZK_PROVIDERS_PATH);
             CompletableFuture<GetResponse> future = kv.get(ByteSequence.from(key, Charset.forName("utf-8")), GetOption.newBuilder().withPrefix(ByteSequence.from(key, Charset.forName("utf-8"))).build());
@@ -74,7 +76,7 @@ public class EtcdDiscovery implements Discovery {
     }
 
     private void watch(String key, DiscoveryContext ctx) {
-        Watch watch = builder.EtcdCli().getWatchClient();
+        Watch watch = builder.etcdCli().getWatchClient();
         watch.watch(ByteSequence.from(key, Charset.forName("utf-8")), WatchOption.newBuilder().withPrefix(ByteSequence.from(key, Charset.forName("utf-8"))).build(),
                 res -> {
                     try {

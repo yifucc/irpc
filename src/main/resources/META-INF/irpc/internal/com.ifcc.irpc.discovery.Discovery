@@ -1,0 +1,2 @@
+zookeeper=com.ifcc.irpc.discovery.zookeeper.ZookeeperDiscovery
+etcd=com.ifcc.irpc.discovery.etcd.EtcdDiscovery

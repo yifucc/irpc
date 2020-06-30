@@ -2,7 +2,7 @@ package com.ifcc.irpc;
 
 import com.ifcc.irpc.registry.Registry;
 import com.ifcc.irpc.registry.RegistryContext;
-import com.ifcc.irpc.registry.zookeeper.ZookeeperBuilder;
+import com.ifcc.irpc.registry.zookeeper.ZookeeperBuilderImpl;
 import com.ifcc.irpc.registry.zookeeper.ZookeeperRegistry;
 
 /**
@@ -12,7 +12,7 @@ import com.ifcc.irpc.registry.zookeeper.ZookeeperRegistry;
  */
 public class TestMain {
     public static void main(String[] ages) {
-        ZookeeperBuilder builder = new ZookeeperBuilder("106.13.230.240:2181");
+        ZookeeperBuilderImpl builder = new ZookeeperBuilderImpl("106.13.230.240:2181");
         Registry registry = new ZookeeperRegistry(builder);
         try {
             RegistryContext ctx = new RegistryContext("ifcc.service.test", "10.101.23.3:9090");

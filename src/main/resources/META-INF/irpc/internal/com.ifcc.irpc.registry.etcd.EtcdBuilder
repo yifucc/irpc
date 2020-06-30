@@ -1,0 +1,1 @@
+etcdBuilder=com.ifcc.irpc.registry.etcd.EtcdBuilderImpl
