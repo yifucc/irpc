@@ -1,53 +1,58 @@
 package com.ifcc.irpc.common.config;
 
+import com.ifcc.irpc.spi.annotation.Config;
 import lombok.Data;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
 
 /**
  * @author chenghaifeng
  * @date 2020-06-05
  * @description 配置类
  */
-@Configuration
 @Data
-public class Config {
+public class IrpcConfig {
     // ============== 服务端配置 ===============
     /**
      * 服务通信端口
      * 默认20080
      */
-    @Value("${irpc.server.port:20080}")
+    @Config("${irpc.server.port:20080}")
     private int port;
 
     /**
      * 可提供的最大连接数
      * 默认100
      */
-    @Value("${irpc.server.accepts:100}")
+    @Config("${irpc.server.accepts:100}")
     private int accepts;
 
     // ============== 客户端配置 ===============
     /**
      * 远程调用重试次数
      */
-    @Value("${irpc.client.retries:2}")
+    @Config("${irpc.client.retries:2}")
     private int retries;
 
     /**
      * 远程调用超时时间，单位毫秒
      * 默认2000
      */
-    @Value("${irpc.client.timeout:2000}")
+    @Config("${irpc.client.timeout:2000}")
     private int timeout;
+
+    @Config("${irpc.client.serialization:protocol}")
+    private String serialization;
+
+    // ============== 公共配置 ================
 
     /**
      * 注册中心 zookeeper etcd
      */
+    @Config("${irpc.registry:zookeeper}")
     private String registry;
 
     /**
      * 注册中心地址
      */
+    @Config("${irpc.registryAddress}")
     private String registryAddress;
 }

@@ -1,28 +1,33 @@
 package com.ifcc.irpc.common.config;
 
+import com.ifcc.irpc.spi.annotation.Cell;
+
+import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author chenghaifeng
  * @date 2020-06-30
  * @description
  */
+@Cell("properties")
 public class PropertiesProvider implements IConfigProvider<Properties> {
 
-    private String filePath;
+    private final Map<String, Properties> propertiesMap = new ConcurrentHashMap<>();
 
-    public PropertiesProvider(String filePath) {
-        this.filePath = filePath;
-    }
+    public PropertiesProvider() {}
 
     @Override
-    public Properties provide() {
-        Properties props = new Properties();
-        try {
-            props.load(ClassLoader.getSystemResourceAsStream(filePath));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return props;
+    public Properties provide(String filePath) {
+        return propertiesMap.computeIfAbsent(filePath, path -> {
+            Properties props = new Properties();
+            try {
+                props.load(ClassLoader.getSystemResourceAsStream(filePath));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return props;
+        });
     }
 }

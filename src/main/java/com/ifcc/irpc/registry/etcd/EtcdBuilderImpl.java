@@ -15,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class EtcdBuilderImpl implements EtcdBuilder{
 
-    @Config("registryAddress")
+    @Config("${irpc.registryAddress}")
     private String registryAddress;
 
     private Client etcd;

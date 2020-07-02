@@ -1,13 +1,10 @@
 package com.ifcc.irpc.spi;
 
-import com.ifcc.irpc.spi.annotation.Config;
-import com.ifcc.irpc.spi.annotation.Inject;
 import com.ifcc.irpc.spi.annotation.SPI;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.lang.reflect.Field;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
@@ -19,31 +16,37 @@ import java.util.regex.Pattern;
 /**
  * @author chenghaifeng
  * @date 2020-06-12
- * @description
+ * @description spi加载器
  */
-public class ExtensionLoad<T> {
+public class ExtensionLoad<T> extends AbstractLoad<T> {
 
     private static final String IRPC_INTERNAL_DIRECTORY = "META-INF/irpc/internal/";
     private static final String IRPC_DIRECTORY = "META-INF/irpc/";
     private static final Pattern NAME_SEPARATOR = Pattern.compile("\\s*[,]+\\s*");
+//    private final static String DEFAULT_CONFIG_PATH = "irpc.properties";
 
-    private static Map<Class<?>, ExtensionLoad<?>> EXTENSION_LOAD_MAP = new ConcurrentHashMap<>();
+    private final static Map<Class<?>, ExtensionLoad<?>> EXTENSION_LOAD_MAP = new ConcurrentHashMap<>();
 
     /**
      * key 实现类别名
      * value 实现类class
      */
-    private Map<String, Class<?>> extensionClasses;
+//    private Map<String, Class<?>> extensionClasses;
 
     private Class<T> interfaceClass;
 
     private String defaultName;
 
-    private Map<String, Object> instances = new ConcurrentHashMap<>();
+//    private Map<String, Object> instances = new ConcurrentHashMap<>();
+
+//    private final ExtensionFactory factory;
 
 
     public ExtensionLoad(Class<T> interfaceClass) {
+        super();
         this.interfaceClass = interfaceClass;
+        ExtensionFactory factory = interfaceClass == ExtensionFactory.class? null : ExtensionLoad.getExtensionLoad(ExtensionFactory.class).getDefaultExtension();
+        super.setFactory(factory);
     }
 
     public static <T> ExtensionLoad<T> getExtensionLoad(Class<T> interfaceClass) {
@@ -61,6 +64,7 @@ public class ExtensionLoad<T> {
         return loader;
     }
 
+   /* @Override
     public T getExtension(String name) {
         if (StringUtils.isBlank(name)) {
             throw new IllegalArgumentException("Extension name cannot be null or empty.");
@@ -76,7 +80,7 @@ public class ExtensionLoad<T> {
             }
             return createExtension(name);
         }
-    }
+    }*/
 
     public T getDefaultExtension() {
         if (StringUtils.isBlank(defaultName)) {
@@ -85,20 +89,34 @@ public class ExtensionLoad<T> {
         if (StringUtils.isBlank(defaultName)) {
             return null;
         }
-        return getExtension(defaultName);
+        return this.getExtension(defaultName);
     }
 
-    private T createExtension(String name) {
+    /*protected T createExtension(String name) {
         Class<?> clazz = this.getExtensionClasses().get(name);
         try {
             T instance = (T)clazz.newInstance();
+            instances.put(name, instance);
             // 依赖注入
             instance = injectExtension(instance);
-            instances.put(name, instance);
+            initExtension(instance);
             return instance;
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
+    }*/
+
+    /*private T initExtension(T instance) {
+        try {
+            Method init = instance.getClass().getDeclaredMethod("init", null);
+            if (init != null) {
+                init.invoke(instance, null);
+            }
+        } catch (Exception e) {
+            //e.printStackTrace();
+            return instance;
+        }
+        return instance;
     }
 
     private T injectExtension(T instance) {
@@ -106,6 +124,11 @@ public class ExtensionLoad<T> {
             return instance;
         }
         try {
+            String configPath = DEFAULT_CONFIG_PATH;
+            ConfigSource configSource = instance.getClass().getAnnotation(ConfigSource.class);
+            if (configSource != null && StringUtils.isNotBlank(configSource.value())) {
+                configPath = configSource.value();
+            }
             Field[] fields = instance.getClass().getDeclaredFields();
             for (Field field : fields) {
                 Inject inject = field.getAnnotation(Inject.class);
@@ -113,9 +136,9 @@ public class ExtensionLoad<T> {
                 if (inject != null) {
                     Object injectValue = null;
                     if (StringUtils.isNotBlank(inject.value())) {
-                        injectValue = ExtensionFactory.getExtension(field.getType(), inject.value());
+                        injectValue = factory.getExtension(field.getType(), inject.value());
                     } else {
-                        injectValue = ExtensionFactory.getExtension(field.getType());
+                        injectValue = factory.getExtension(field.getType());
                     }
                     field.setAccessible(true);
                     if (injectValue != null) {
@@ -123,7 +146,9 @@ public class ExtensionLoad<T> {
                     }
                 }
                 if (config != null) {
-                    String value = ExtensionFactory.getSpiContext().getCustomConfig().get(config.value());
+                    IConfigProvider<Properties> provider = factory.getExtension(IConfigProvider.class, "properties");
+                    Properties props = provider.provide(configPath);
+                    String value = PlaceholderUtil.resolveStringValue(props, config.value());
                     if (StringUtils.isBlank(value) && config.required()) {
                         throw new IllegalStateException("The config cannot be empty: " + config.value());
                     }
@@ -135,9 +160,9 @@ public class ExtensionLoad<T> {
             e.printStackTrace();
         }
         return instance;
-    }
+    }*/
 
-    private Map<String, Class<?>> getExtensionClasses() {
+   /* private Map<String, Class<?>> getExtensionClasses() {
         if (extensionClasses == null) {
             synchronized (this) {
                 extensionClasses = loadExtensionClass();
@@ -146,7 +171,12 @@ public class ExtensionLoad<T> {
         return extensionClasses;
     }
 
-    private Map<String, Class<?>> loadExtensionClass() {
+    public Set<String> getSupportedExtensions() {
+        return new TreeSet<>(getExtensionClasses().keySet());
+    }*/
+
+   @Override
+    protected Map<String, Class<?>> loadExtensionClass() {
         SPI spi = interfaceClass.getAnnotation(SPI.class);
         if (spi != null) {
             String name = spi.value();

@@ -7,5 +7,5 @@ package com.ifcc.irpc.common.config;
  */
 public interface IConfigProvider<T> {
 
-    T provide();
+    T provide(String filePath);
 }

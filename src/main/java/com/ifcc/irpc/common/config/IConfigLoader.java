@@ -7,5 +7,5 @@ package com.ifcc.irpc.common.config;
  */
 public interface IConfigLoader<T> {
 
-    T load();
+    T load(String filePath);
 }

@@ -1,0 +1,2 @@
+protocol=com.ifcc.irpc.codec.serialization.protocol.ProtocolSerialization
+msgpack=com.ifcc.irpc.codec.serialization.msgpack.MsgpackSerialization

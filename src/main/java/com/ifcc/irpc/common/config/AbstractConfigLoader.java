@@ -13,8 +13,8 @@ public abstract class AbstractConfigLoader<T, U> implements IConfigLoader<T> {
     }
 
     @Override
-    public T load() {
-        return load(getProvider().provide());
+    public T load(String filePath) {
+        return load(getProvider().provide(filePath));
     }
 
     protected abstract T load(U loadSource);

@@ -18,7 +18,7 @@ import java.util.concurrent.CountDownLatch;
 @Slf4j
 public class ZookeeperBuilderImpl implements ZookeeperBuilder{
 
-    @Config("registryAddress")
+    @Config("${irpc.registryAddress}")
     private String registryAddress;
 
     private ZooKeeper zk;

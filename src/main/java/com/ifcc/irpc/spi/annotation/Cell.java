@@ -9,14 +9,13 @@ import java.lang.annotation.Target;
 
 /**
  * @author chenghaifeng
- * @date 2020-06-29
- * @description 注入
+ * @date 2020-07-02
+ * @description 放入容器管理的注解
  */
-@Target({ElementType.FIELD})
+@Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
-public @interface Inject {
+public @interface Cell {
     String value() default "";
-    boolean singleton() default true;
 }
