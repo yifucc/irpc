@@ -2,7 +2,6 @@ package com.ifcc.irpc.utils;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.sun.istack.internal.NotNull;
 
 import java.io.File;
 import java.lang.reflect.Modifier;
@@ -28,7 +27,6 @@ public class ClassUtil {
         try {
             // 判断class对象是否是一个接口
             if (target.isInterface()) {
-                @NotNull
                 String basePackage = target.getClassLoader().getResource("").getPath();
                 File[] files = new File(basePackage).listFiles();
                 // 存放class路径的list
