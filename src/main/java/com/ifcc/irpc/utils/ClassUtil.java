@@ -5,10 +5,14 @@ import com.google.common.collect.Sets;
 
 import java.io.File;
 import java.lang.reflect.Modifier;
+import java.net.JarURLConnection;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Set;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 /**
  * @author chenghaifeng
@@ -18,6 +22,9 @@ import java.util.Set;
 public class ClassUtil {
     /**
      * 获取一个接口的所有实现类(直接或者间接)
+     *
+     * Class.getResource(""):获取当前类所在的绝对路径
+     * ClassLoader.getResource(""):获取根目录 等价于 Class.getResource("/")
      *
      * @param target
      * @return
@@ -90,4 +97,52 @@ public class ClassUtil {
             }
         }
     }
+
+
+
+    public static void findClassJar(final String packName, Class<?> target, List<Class<?>> list){
+        String pathName = packName.replace(".", "/");
+        JarFile jarFile  = null;
+        try {
+            URL url = target.getClassLoader().getResource(pathName);
+            JarURLConnection jarURLConnection  = (JarURLConnection )url.openConnection();
+            jarFile = jarURLConnection.getJarFile();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("未找到策略资源");
+        }
+
+        Enumeration<JarEntry> jarEntries = jarFile.entries();
+        while (jarEntries.hasMoreElements()) {
+            JarEntry jarEntry = jarEntries.nextElement();
+            String jarEntryName = jarEntry.getName();
+
+            if(jarEntryName.contains(pathName) && !jarEntryName.equals(pathName+"/")){
+                //递归遍历子目录
+                if(jarEntry.isDirectory()){
+                    String clazzName = jarEntry.getName().replace("/", ".");
+                    int endIndex = clazzName.lastIndexOf(".");
+                    String prefix = null;
+                    if (endIndex > 0) {
+                        prefix = clazzName.substring(0, endIndex);
+                    }
+                    findClassJar(prefix, target, list);
+                }
+                if(jarEntry.getName().endsWith(".class")){
+                    Class<?> clazz = null;
+                    try {
+                        clazz = target.getClassLoader().loadClass(jarEntry.getName().replace("/", ".").replace(".class", ""));
+                    } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                    if(target.isAssignableFrom(clazz)){
+                        list.add(clazz);
+                    }
+                }
+            }
+
+        }
+
+    }
+
 }
