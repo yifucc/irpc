@@ -2,11 +2,13 @@ package com.ifcc.irpc.utils;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.lang.reflect.Modifier;
 import java.net.JarURLConnection;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
@@ -53,13 +55,39 @@ public class ClassUtil {
                     Set<Class<?>> interfaces = Sets.newHashSet();
                     getInterfacesByCycle(classObject, interfaces);
                     if (interfaces.contains(target)) {
-                        subclasses.add(Class.forName(classObject.getName()));
+                        subclasses.add(classObject);
                     }
                 }
             } else {
                 throw new IllegalArgumentException("Class对象不是一个interface");
             }
         } catch (Throwable e) {
+            e.printStackTrace();
+        }
+        return subclasses;
+    }
+
+    private static Set<Class<?>> getClassByFile(Class<?> target, String basePackage) {
+        Set<Class<?>> subclasses = Sets.newHashSet();
+        try {
+            if (target.isInterface()) {
+                List<String> classpaths = Lists.newArrayList();
+                listPackages(basePackage, classpaths);
+                // 获取所有类,然后判断是否是 target 接口的实现类
+                for (String classpath : classpaths) {
+                    Class<?> classObject = Class.forName(classpath);
+                    if(!target.isAssignableFrom(classObject)) {
+                        continue;
+                    }
+                    if (Modifier.isAbstract(classObject.getModifiers()) || Modifier.isInterface(classObject.getModifiers())) {
+                        continue;
+                    }
+                    subclasses.add(classObject);
+                }
+            } else {
+                throw new IllegalArgumentException("Class is not a interface: " + target.getName());
+            }
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return subclasses;
@@ -87,7 +115,7 @@ public class ClassUtil {
         for (File file : directory.listFiles()) {
             // 如果是一个目录就继续往下读取(递归调用)
             if (file.isDirectory()) {
-                listPackages(basePackage + "." + file.getName(), classes);
+                listPackages(basePackage + (StringUtils.isNotBlank(basePackage) ? "." : "") + file.getName(), classes);
             } else {
                 // 如果不是一个目录,判断是不是以.class结尾的文件,如果不是则不作处理
                 String classpath = file.getName();
@@ -96,6 +124,140 @@ public class ClassUtil {
                 }
             }
         }
+    }
+
+    public static Set<Class<?>> getAllSubClass(Class<?> target, String basePackage) {
+        if (StringUtils.isBlank(basePackage)) {
+            basePackage = "com.ifcc.irpc";
+        }
+        Set<Class<?>> classes = null;
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        String packagePath = basePackage.replace(".", "/");
+        URL url = loader.getResource(packagePath);
+        if (url != null) {
+            String type = url.getProtocol();
+            if ("file".equals(type)) {
+                classes = getClassByFile(target, basePackage);
+            } else if ("jar".equals(type)) {
+                classes = getClassByJar(url.getPath(), target, true);
+            }
+        } else {
+            classes = getClassByJars(((URLClassLoader) loader).getURLs(), packagePath, target, true);
+        }
+        return classes;
+    }
+
+
+    /**
+     * 从项目文件获取某包下所有类
+     * @param filePath 文件路径
+     * @param childPackage 是否遍历子包
+     * @return 类的完整名称
+     */
+    private static Set<String> getClassNameByFile(String filePath, boolean childPackage) {
+        Set<String> myClassName = Sets.newHashSet();
+        File file = new File(filePath);
+        File[] childFiles = file.listFiles();
+        for (File childFile : childFiles) {
+            if (childFile.isDirectory()) {
+                if (childPackage) {
+                    myClassName.addAll(getClassNameByFile(childFile.getPath(), childPackage));
+                }
+            } else {
+                String childFilePath = childFile.getPath();
+                if (childFilePath.endsWith(".class")) {
+                    childFilePath = childFilePath.substring(childFilePath.indexOf("\\classes") + 9, childFilePath.lastIndexOf("."));
+                    childFilePath = childFilePath.replace("\\", ".");
+                    myClassName.add(childFilePath);
+                }
+            }
+        }
+
+        return myClassName;
+    }
+
+
+    /**
+     * 从所有jar中搜索该包，并获取该包下所有类
+     * @param urls URL集合
+     * @param packagePath 包路径
+     * @param childPackage 是否遍历子包
+     * @return 类的完整名称
+     */
+    private static Set<Class<?>> getClassByJars(URL[] urls, String packagePath, Class<?> target, boolean childPackage) {
+        Set<Class<?>> classes = Sets.newHashSet();
+        if (urls != null) {
+            for (int i = 0; i < urls.length; i++) {
+                URL url = urls[i];
+                String urlPath = url.getPath();
+                // 不必搜索classes文件夹
+                if (urlPath.endsWith("classes/")) {
+                    continue;
+                }
+                String jarPath = urlPath + "!/" + packagePath;
+                classes.addAll(getClassByJar(jarPath, target, childPackage));
+            }
+        }
+        return classes;
+    }
+
+
+    /**
+     * 从jar获取某包下所有类
+     * @param jarPath jar文件路径
+     * @param childPackage 是否遍历子包
+     * @return 类的完整名称
+     */
+    private static Set<Class<?>> getClassByJar(String jarPath, Class<?> target, boolean childPackage) {
+        Set<Class<?>> myClass = Sets.newHashSet();
+        String[] jarInfo = jarPath.split("!");
+        String jarFilePath = jarInfo[0].substring(jarInfo[0].indexOf("/"));
+        String packagePath = jarInfo[1].substring(1);
+        try {
+            JarFile jarFile = new JarFile(jarFilePath);
+            Enumeration<JarEntry> entrys = jarFile.entries();
+            while (entrys.hasMoreElements()) {
+                JarEntry jarEntry = entrys.nextElement();
+                String entryName = jarEntry.getName();
+                if (entryName.endsWith(".class")) {
+                    if (childPackage) {
+                        if (entryName.startsWith(packagePath)) {
+                            entryName = entryName.replace("/", ".").substring(0, entryName.lastIndexOf("."));
+                            Class<?> clazz = Class.forName(entryName);
+                            if(!target.isAssignableFrom(clazz)) {
+                                continue;
+                            }
+                            if (Modifier.isAbstract(clazz.getModifiers()) || Modifier.isInterface(clazz.getModifiers())) {
+                                continue;
+                            }
+                            myClass.add(clazz);
+                        }
+                    } else {
+                        int index = entryName.lastIndexOf("/");
+                        String myPackagePath;
+                        if (index != -1) {
+                            myPackagePath = entryName.substring(0, index);
+                        } else {
+                            myPackagePath = entryName;
+                        }
+                        if (myPackagePath.equals(packagePath)) {
+                            entryName = entryName.replace("/", ".").substring(0, entryName.lastIndexOf("."));
+                            Class<?> clazz = Class.forName(entryName);
+                            if(!target.isAssignableFrom(clazz)) {
+                                continue;
+                            }
+                            if (Modifier.isAbstract(clazz.getModifiers()) || Modifier.isInterface(clazz.getModifiers())) {
+                                continue;
+                            }
+                            myClass.add(clazz);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return myClass;
     }
 
 

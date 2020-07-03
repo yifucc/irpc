@@ -1,8 +1,8 @@
-package com.ifcc.irpc.discovery;
+package test.com.ifcc.irpc.discovery;
 
-import com.ifcc.irpc.common.config.AbstractConfigLoader;
-import com.ifcc.irpc.common.config.IConfigLoader;
 import com.ifcc.irpc.common.config.IConfigProvider;
+import com.ifcc.irpc.discovery.Discovery;
+import com.ifcc.irpc.discovery.DiscoveryContext;
 import com.ifcc.irpc.spi.ExtensionLoad;
 import com.ifcc.irpc.spi.factory.ExtensionFactory;
 import com.ifcc.irpc.utils.ClassUtil;
@@ -10,8 +10,7 @@ import com.ifcc.irpc.utils.LocalIpUtil;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 
 /**
  * @author chenghaifeng
@@ -54,11 +53,13 @@ public class DiscoveryTest {
 
     @Test
     void test2() {
-        List<Class<?>> classes = ClassUtil.getInterfaceImpls(IConfigProvider.class);
-        ArrayList<Class<?>> list = new ArrayList<>();
+        Set<Class<?>> classes = ClassUtil.getAllSubClass(IConfigProvider.class, "");
+//        ArrayList<Class<?>> list = new ArrayList<>();
         //ClassUtil.findClassJar("com.ifcc", IConfigProvider.class, list);
         System.out.println(classes);
-        System.out.println(list);
-        System.out.println(IConfigLoader.class.isAssignableFrom(AbstractConfigLoader.class));
+
+
+//        System.out.println(list);
+//        System.out.println(IConfigLoader.class.isAssignableFrom(AbstractConfigLoader.class));
     }
 }

@@ -6,8 +6,8 @@ import com.ifcc.irpc.spi.factory.ExtensionFactory;
 import com.ifcc.irpc.utils.ClassUtil;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -36,7 +36,7 @@ public class ContainerLoad<T> extends AbstractLoad<T>{
     protected Map<String, Class<?>> loadExtensionClass() {
         Map<String, Class<?>> classMap = Maps.newHashMap();
         if (type.isInterface()) {
-            List<Class<?>> classes = ClassUtil.getInterfaceImpls(type);
+            Set<Class<?>> classes = ClassUtil.getAllSubClass(type, "");
             if(classes.isEmpty()) {
                 throw new IllegalArgumentException("The interface class has no implement class: " + type.getName());
             }
@@ -49,7 +49,7 @@ public class ContainerLoad<T> extends AbstractLoad<T>{
                     classMap.put(cell.value(), clazz);
                 }
             } else {
-                Class<?> clazz = classes.get(0);
+                Class<?> clazz = classes.iterator().next();
                 Cell cell = clazz.getAnnotation(Cell.class);
                 String name = clazz.getName();
                 if(cell != null && StringUtils.isNotBlank(cell.value())) {

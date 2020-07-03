@@ -1,7 +1,8 @@
-package com.ifcc.irpc.codec.serialization.protocol;
+package test.com.ifcc.irpc.codec.serialization.protocol;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.ifcc.irpc.codec.serialization.protocol.IrpcProtocol;
 
 import java.util.Arrays;
 

@@ -1,9 +1,12 @@
 package com.ifcc.irpc;
 
+import com.ifcc.irpc.common.config.IConfigLoader;
 import com.ifcc.irpc.registry.Registry;
 import com.ifcc.irpc.registry.RegistryContext;
 import com.ifcc.irpc.spi.factory.ExtensionFactory;
 import com.ifcc.irpc.spi.ExtensionLoad;
+import com.ifcc.irpc.utils.ClassUtil;
+import lombok.SneakyThrows;
 
 /**
  * @author chenghaifeng
@@ -12,6 +15,7 @@ import com.ifcc.irpc.spi.ExtensionLoad;
  */
 public class SPIMain {
 
+    @SneakyThrows
     public static void main(String[] args) {
         Registry registry = ExtensionLoad.getExtensionLoad(ExtensionFactory.class).getDefaultExtension().getExtension(Registry.class);
         try {
@@ -24,6 +28,6 @@ public class SPIMain {
             e.printStackTrace();
         }
 //        System.out.println(ExtensionLoad.getExtensionLoad(ExtensionFactory.class).getDefaultExtension());
-//        System.out.println(ClassUtil.getInterfaceImpls(IConfigLoader.class));
+//        System.out.println(ClassUtil.getAllSubClass(IConfigLoader.class));
     }
 }
