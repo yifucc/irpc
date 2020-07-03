@@ -2,6 +2,7 @@ package com.ifcc.irpc.spi;
 
 import com.google.common.collect.Maps;
 import com.ifcc.irpc.spi.annotation.Cell;
+import com.ifcc.irpc.spi.factory.ExtensionFactory;
 import com.ifcc.irpc.utils.ClassUtil;
 import org.apache.commons.lang3.StringUtils;
 
@@ -19,7 +20,7 @@ public class ContainerLoad<T> extends AbstractLoad<T>{
 
     private Class<T> type;
 
-    public ContainerLoad(Class<T> type) {
+    private ContainerLoad(Class<T> type) {
         super(ExtensionLoad.getExtensionLoad(ExtensionFactory.class).getDefaultExtension());
         this.type = type;
     }

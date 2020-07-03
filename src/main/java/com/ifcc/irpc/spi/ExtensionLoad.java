@@ -1,6 +1,7 @@
 package com.ifcc.irpc.spi;
 
 import com.ifcc.irpc.spi.annotation.SPI;
+import com.ifcc.irpc.spi.factory.ExtensionFactory;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedReader;
@@ -42,7 +43,7 @@ public class ExtensionLoad<T> extends AbstractLoad<T> {
 //    private final ExtensionFactory factory;
 
 
-    public ExtensionLoad(Class<T> interfaceClass) {
+    private ExtensionLoad(Class<T> interfaceClass) {
         super();
         this.interfaceClass = interfaceClass;
         ExtensionFactory factory = interfaceClass == ExtensionFactory.class? null : ExtensionLoad.getExtensionLoad(ExtensionFactory.class).getDefaultExtension();

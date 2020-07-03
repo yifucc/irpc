@@ -1,3 +1,0 @@
-adaptive=com.ifcc.irpc.spi.AdaptiveExtensionFactory
-container=com.ifcc.irpc.spi.ContainerExtensionFactory
-spi=com.ifcc.irpc.spi.SpiExtensionFactory

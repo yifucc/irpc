@@ -29,7 +29,6 @@ public class SpiContext {
             customConfig.put(Registry.class.getName(), config.getRegistry());
             customConfig.put(Discovery.class.getName(), config.getRegistry());
             customConfig.put(Serialization.class.getName(), config.getSerialization());
-            System.out.println(config);
         } catch (Exception e) {
             e.printStackTrace();
         }

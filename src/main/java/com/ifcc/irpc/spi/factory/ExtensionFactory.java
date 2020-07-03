@@ -1,4 +1,4 @@
-package com.ifcc.irpc.spi;
+package com.ifcc.irpc.spi.factory;
 
 import com.ifcc.irpc.spi.annotation.SPI;
 

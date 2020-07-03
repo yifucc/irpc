@@ -2,7 +2,7 @@ package com.ifcc.irpc;
 
 import com.ifcc.irpc.registry.Registry;
 import com.ifcc.irpc.registry.RegistryContext;
-import com.ifcc.irpc.spi.ExtensionFactory;
+import com.ifcc.irpc.spi.factory.ExtensionFactory;
 import com.ifcc.irpc.spi.ExtensionLoad;
 
 /**

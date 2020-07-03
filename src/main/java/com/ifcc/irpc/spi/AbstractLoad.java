@@ -4,6 +4,7 @@ import com.ifcc.irpc.common.config.IConfigProvider;
 import com.ifcc.irpc.spi.annotation.Config;
 import com.ifcc.irpc.spi.annotation.ConfigSource;
 import com.ifcc.irpc.spi.annotation.Inject;
+import com.ifcc.irpc.spi.factory.ExtensionFactory;
 import com.ifcc.irpc.utils.PlaceholderUtil;
 import org.apache.commons.lang3.StringUtils;
 
