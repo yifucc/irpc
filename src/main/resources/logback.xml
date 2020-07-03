@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 日志级别从低到高分为TRACE < DEBUG < INFO < WARN < ERROR < FATAL，如果设置为WARN，则低于WARN的信息都不会输出 -->
-<configuration  scan="true">
-    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+<configuration scan="true">
 
     <!--输出到控制台-->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
@@ -9,7 +8,7 @@
             <level>info</level>
         </filter>
         <encoder>
-            <Pattern>${CONSOLE_LOG_PATTERN}</Pattern>
+            <Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level ---- [%thread] %logger{36} : %msg%n</Pattern>
             <!-- 设置字符集 -->
             <charset>UTF-8</charset>
         </encoder>
