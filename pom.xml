@@ -7,6 +7,7 @@
     <groupId>com.ifcc</groupId>
     <artifactId>irpc</artifactId>
     <version>1.0.0</version>
+    <packaging>jar</packaging>
 
     <properties>
         <springboot.version>2.1.3.RELEASE</springboot.version>
