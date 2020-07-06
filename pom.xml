@@ -19,6 +19,7 @@
         <msgpack.version>0.8.20</msgpack.version>
         <protobuf.version>3.11.0</protobuf.version>
         <junit.version>5.6.2</junit.version>
+        <logback.version>1.2.3</logback.version>
     </properties>
 
     <dependencies>
@@ -83,16 +84,16 @@
         </dependency>
 
         <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
             <version>${junit.version}</version>
             <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.2.3</version>
         </dependency>
 
     </dependencies>

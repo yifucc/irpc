@@ -2,6 +2,7 @@ package com.ifcc.irpc.utils;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
@@ -21,6 +22,7 @@ import java.util.jar.JarFile;
  * @date 2020-07-01
  * @description
  */
+@Slf4j
 public class ClassUtil {
     /**
      * 获取一个接口的所有实现类(直接或者间接)
