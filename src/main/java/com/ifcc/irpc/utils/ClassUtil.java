@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.Arrays;
@@ -138,7 +139,7 @@ public class ClassUtil {
             throw new IllegalArgumentException("Class is not a interface: " + target.getName());
         }
         if (StringUtils.isBlank(basePackage)) {
-            basePackage = "";
+            basePackage = "com.ifcc.irpc";
         }
         Set<Class<?>> classes = Sets.newHashSet();
         Set<Class<?>> packagesClasses = getAllClassByPackages(Lists.newArrayList(basePackage));
@@ -153,6 +154,17 @@ public class ClassUtil {
                 continue;
             }
             classes.add(clazz);
+        }
+        return classes;
+    }
+
+    public static Set<Class<?>> getAllClassByAnnotation(Class<? extends Annotation> annotationClass, List<String> basePackages) {
+        Set<Class<?>> classes = Sets.newHashSet();
+        Set<Class<?>> packagesClasses = getAllClassByPackages(basePackages);
+        for (Class<?> clazz : packagesClasses) {
+            if (clazz.getAnnotation(annotationClass) != null ) {
+                classes.add(clazz);
+            }
         }
         return classes;
     }
@@ -220,7 +232,7 @@ public class ClassUtil {
      * @param childPackage 是否遍历子包
      * @return 类的完整名称
      */
-    private static Set<Class<?>> getClassByJars(URL[] urls, String packagePath, Class<?> target, boolean childPackage) {
+    private static Set<Class<?>> getClassByJars(URL[] urls, String packagePath, boolean childPackage) {
         Set<Class<?>> classes = Sets.newHashSet();
         if (urls != null) {
             for (int i = 0; i < urls.length; i++) {
