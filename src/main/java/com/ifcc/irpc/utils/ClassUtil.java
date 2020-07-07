@@ -9,7 +9,6 @@ import java.io.File;
 import java.lang.reflect.Modifier;
 import java.net.JarURLConnection;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
@@ -132,19 +131,24 @@ public class ClassUtil {
         if (StringUtils.isBlank(basePackage)) {
             basePackage = "com.ifcc.irpc";
         }
-        Set<Class<?>> classes = null;
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        String packagePath = basePackage.replace(".", "/");
-        URL url = loader.getResource(packagePath);
-        if (url != null) {
-            String type = url.getProtocol();
-            if ("file".equals(type)) {
-                classes = getClassByFile(target, basePackage);
-            } else if ("jar".equals(type)) {
-                classes = getClassByJar(url.getPath(), target, true);
+        Set<Class<?>> classes = Sets.newHashSet();
+        try {
+            ClassLoader loader = Thread.currentThread().getContextClassLoader();
+            String packagePath = basePackage.replace(".", "/");
+            Enumeration<URL> urls = loader.getResources(packagePath);
+            URL url;
+            while ( urls.hasMoreElements() ) {
+                url = urls.nextElement();
+                String type = url.getProtocol();
+//                System.out.println(url);
+                if ("file".equals(type)) {
+                    classes.addAll(getClassByFile(target, basePackage));
+                } else if ("jar".equals(type)) {
+                    classes.addAll(getClassByJar(url.getPath(), target, true));
+                }
             }
-        } else {
-            classes = getClassByJars(((URLClassLoader) loader).getURLs(), packagePath, target, true);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return classes;
     }
@@ -219,45 +223,49 @@ public class ClassUtil {
             JarFile jarFile = new JarFile(jarFilePath);
             Enumeration<JarEntry> entrys = jarFile.entries();
             while (entrys.hasMoreElements()) {
-                JarEntry jarEntry = entrys.nextElement();
-                String entryName = jarEntry.getName();
-                if (entryName.endsWith(".class")) {
-                    if (childPackage) {
-                        if (entryName.startsWith(packagePath)) {
-                            entryName = entryName.replace("/", ".").substring(0, entryName.lastIndexOf("."));
-                            Class<?> clazz = Class.forName(entryName);
-                            if(!target.isAssignableFrom(clazz)) {
-                                continue;
+                try {
+                    JarEntry jarEntry = entrys.nextElement();
+                    String entryName = jarEntry.getName();
+                    if (entryName.endsWith(".class")) {
+                        if (childPackage) {
+                            if (entryName.startsWith(packagePath)) {
+                                entryName = entryName.replace("/", ".").substring(0, entryName.lastIndexOf("."));
+                                Class<?> clazz = Class.forName(entryName);
+                                if(!target.isAssignableFrom(clazz)) {
+                                    continue;
+                                }
+                                if (Modifier.isAbstract(clazz.getModifiers()) || Modifier.isInterface(clazz.getModifiers())) {
+                                    continue;
+                                }
+                                myClass.add(clazz);
                             }
-                            if (Modifier.isAbstract(clazz.getModifiers()) || Modifier.isInterface(clazz.getModifiers())) {
-                                continue;
-                            }
-                            myClass.add(clazz);
-                        }
-                    } else {
-                        int index = entryName.lastIndexOf("/");
-                        String myPackagePath;
-                        if (index != -1) {
-                            myPackagePath = entryName.substring(0, index);
                         } else {
-                            myPackagePath = entryName;
-                        }
-                        if (myPackagePath.equals(packagePath)) {
-                            entryName = entryName.replace("/", ".").substring(0, entryName.lastIndexOf("."));
-                            Class<?> clazz = Class.forName(entryName);
-                            if(!target.isAssignableFrom(clazz)) {
-                                continue;
+                            int index = entryName.lastIndexOf("/");
+                            String myPackagePath;
+                            if (index != -1) {
+                                myPackagePath = entryName.substring(0, index);
+                            } else {
+                                myPackagePath = entryName;
                             }
-                            if (Modifier.isAbstract(clazz.getModifiers()) || Modifier.isInterface(clazz.getModifiers())) {
-                                continue;
+                            if (myPackagePath.equals(packagePath)) {
+                                entryName = entryName.replace("/", ".").substring(0, entryName.lastIndexOf("."));
+                                Class<?> clazz = Class.forName(entryName);
+                                if(!target.isAssignableFrom(clazz)) {
+                                    continue;
+                                }
+                                if (Modifier.isAbstract(clazz.getModifiers()) || Modifier.isInterface(clazz.getModifiers())) {
+                                    continue;
+                                }
+                                myClass.add(clazz);
                             }
-                            myClass.add(clazz);
                         }
                     }
+                } catch (Throwable e) {
+                    // e.printStackTrace();
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            // e.printStackTrace();
         }
         return myClass;
     }

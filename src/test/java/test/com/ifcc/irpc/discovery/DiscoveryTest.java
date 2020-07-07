@@ -1,5 +1,8 @@
 package test.com.ifcc.irpc.discovery;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.Lists;
+import com.ifcc.irpc.common.config.IConfigLoader;
 import com.ifcc.irpc.common.config.IConfigProvider;
 import com.ifcc.irpc.discovery.Discovery;
 import com.ifcc.irpc.discovery.DiscoveryContext;
@@ -53,7 +56,7 @@ public class DiscoveryTest {
 
     @Test
     void test2() {
-        Set<Class<?>> classes = ClassUtil.getAllSubClass(IConfigProvider.class, "");
+        Set<Class<?>> classes = ClassUtil.getAllSubClass(IConfigLoader.class, "com.ifcc.irpc");
 //        ArrayList<Class<?>> list = new ArrayList<>();
         //ClassUtil.findClassJar("com.ifcc", IConfigProvider.class, list);
         System.out.println(classes);
