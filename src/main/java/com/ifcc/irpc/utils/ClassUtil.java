@@ -1,17 +1,19 @@
 package com.ifcc.irpc.utils;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.ifcc.irpc.common.Holder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.lang.reflect.Modifier;
-import java.net.JarURLConnection;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -23,6 +25,11 @@ import java.util.jar.JarFile;
  */
 @Slf4j
 public class ClassUtil {
+
+    private static final Map<String, Holder<Class<?>>> CLASS_CACHE = Maps.newConcurrentMap();
+
+    private static final Map<String, Holder<Set<Class<?>>>> PACKAGE_CACHE = Maps.newConcurrentMap();
+
     /**
      * 获取一个接口的所有实现类(直接或者间接)
      *
@@ -44,7 +51,7 @@ public class ClassUtil {
                 for (File file : files) {
                     // 扫描项目编译后的所有类
                     if (file.isDirectory()) {
-                        listPackages(file.getName(), classpaths);
+                        // listPackages(file.getName(), classpaths);
                     }
                 }
                 // 获取所有类,然后判断是否是 target 接口的实现类
@@ -68,25 +75,24 @@ public class ClassUtil {
         return subclasses;
     }
 
-    private static Set<Class<?>> getClassByFile(Class<?> target, String basePackage) {
+    private static Set<Class<?>> getClassByFile(String path, String basePackage) {
         Set<Class<?>> subclasses = Sets.newHashSet();
         try {
-            if (target.isInterface()) {
-                List<String> classpaths = Lists.newArrayList();
-                listPackages(basePackage, classpaths);
-                // 获取所有类,然后判断是否是 target 接口的实现类
-                for (String classpath : classpaths) {
-                    Class<?> classObject = Class.forName(classpath);
-                    if(!target.isAssignableFrom(classObject)) {
-                        continue;
-                    }
-                    if (Modifier.isAbstract(classObject.getModifiers()) || Modifier.isInterface(classObject.getModifiers())) {
-                        continue;
-                    }
+            List<String> classpaths = Lists.newArrayList();
+            listPackages(path, basePackage, classpaths);
+            // 获取所有类,然后判断是否是 target 接口的实现类
+            for (String classpath : classpaths) {
+                // Class<?> classObject = Class.forName(classpath);
+                Class<?> classObject = getClassByName(classpath);
+                /*if(!target.isAssignableFrom(classObject)) {
+                    continue;
+                }
+                if (Modifier.isAbstract(classObject.getModifiers()) || Modifier.isInterface(classObject.getModifiers())) {
+                    continue;
+                }*/
+                if (classObject != null) {
                     subclasses.add(classObject);
                 }
-            } else {
-                throw new IllegalArgumentException("Class is not a interface: " + target.getName());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -109,14 +115,14 @@ public class ClassUtil {
      * @param classes     存放字节码文件路径的集合
      * @return
      */
-    private static void listPackages(String basePackage, List<String> classes) {
-        URL url = ClassUtil.class.getClassLoader()
-                .getResource("./" + basePackage.replaceAll("\\.", "/"));
-        File directory = new File(url.getFile());
+    private static void listPackages(String path, String basePackage, List<String> classes) {
+        /*URL url = ClassUtil.class.getClassLoader()
+                .getResource("./" + basePackage.replaceAll("\\.", "/"));*/
+        File directory = new File(path);
         for (File file : directory.listFiles()) {
             // 如果是一个目录就继续往下读取(递归调用)
             if (file.isDirectory()) {
-                listPackages(basePackage + (StringUtils.isNotBlank(basePackage) ? "." : "") + file.getName(), classes);
+                listPackages(path + "/" + file.getName(),basePackage + (StringUtils.isNotBlank(basePackage) ? "." : "") + file.getName(), classes);
             } else {
                 // 如果不是一个目录,判断是不是以.class结尾的文件,如果不是则不作处理
                 String classpath = file.getName();
@@ -128,27 +134,51 @@ public class ClassUtil {
     }
 
     public static Set<Class<?>> getAllSubClass(Class<?> target, String basePackage) {
+        if(!target.isInterface()) {
+            throw new IllegalArgumentException("Class is not a interface: " + target.getName());
+        }
         if (StringUtils.isBlank(basePackage)) {
-            basePackage = "com.ifcc.irpc";
+            basePackage = "";
         }
         Set<Class<?>> classes = Sets.newHashSet();
-        try {
-            ClassLoader loader = Thread.currentThread().getContextClassLoader();
-            String packagePath = basePackage.replace(".", "/");
-            Enumeration<URL> urls = loader.getResources(packagePath);
-            URL url;
-            while ( urls.hasMoreElements() ) {
-                url = urls.nextElement();
-                String type = url.getProtocol();
-//                System.out.println(url);
-                if ("file".equals(type)) {
-                    classes.addAll(getClassByFile(target, basePackage));
-                } else if ("jar".equals(type)) {
-                    classes.addAll(getClassByJar(url.getPath(), target, true));
-                }
+        Set<Class<?>> packagesClasses = getAllClassByPackages(Lists.newArrayList(basePackage));
+        for (Class<?> clazz : packagesClasses) {
+            if(clazz == null) {
+                continue;
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+            if(!target.isAssignableFrom(clazz)) {
+                continue;
+            }
+            if (Modifier.isAbstract(clazz.getModifiers()) || Modifier.isInterface(clazz.getModifiers())) {
+                continue;
+            }
+            classes.add(clazz);
+        }
+        return classes;
+    }
+
+    public static Set<Class<?>> getAllClassByPackages(List<String> basePackages) {
+        Set<Class<?>> classes = Sets.newHashSet();
+        for (String basePackage : basePackages) {
+            try {
+                ClassLoader loader = Thread.currentThread().getContextClassLoader();
+                String packagePath = basePackage.replace(".", "/");
+                Enumeration<URL> urls = loader.getResources(packagePath);
+                URL url;
+                while ( urls.hasMoreElements() ) {
+                    url = urls.nextElement();
+//                    System.out.println(url.getPath());
+                    String type = url.getProtocol();
+                    System.out.println(type);
+                    if ("file".equals(type)) {
+                        classes.addAll(getClassByFile(url.getPath(), basePackage));
+                    } else if ("jar".equals(type)) {
+                        classes.addAll(getClassByJar(url.getPath(), true));
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         return classes;
     }
@@ -160,7 +190,7 @@ public class ClassUtil {
      * @param childPackage 是否遍历子包
      * @return 类的完整名称
      */
-    private static Set<String> getClassNameByFile(String filePath, boolean childPackage) {
+    public static Set<String> getClassNameByFile(String filePath, boolean childPackage) {
         Set<String> myClassName = Sets.newHashSet();
         File file = new File(filePath);
         File[] childFiles = file.listFiles();
@@ -172,8 +202,8 @@ public class ClassUtil {
             } else {
                 String childFilePath = childFile.getPath();
                 if (childFilePath.endsWith(".class")) {
-                    childFilePath = childFilePath.substring(childFilePath.indexOf("\\classes") + 9, childFilePath.lastIndexOf("."));
-                    childFilePath = childFilePath.replace("\\", ".");
+                    childFilePath = childFilePath.substring(childFilePath.indexOf("/classes") + 9, childFilePath.lastIndexOf("."));
+                    childFilePath = childFilePath.replace("/", ".");
                     myClassName.add(childFilePath);
                 }
             }
@@ -201,12 +231,31 @@ public class ClassUtil {
                     continue;
                 }
                 String jarPath = urlPath + "!/" + packagePath;
-                classes.addAll(getClassByJar(jarPath, target, childPackage));
+                classes.addAll(getClassByJar(jarPath, childPackage));
             }
         }
         return classes;
     }
 
+
+    private static Class<?> getClassByName(String classname) {
+        Holder<Class<?>> holder = CLASS_CACHE.computeIfAbsent(classname, n -> new Holder<>());
+        Class<?> clazz = holder.get();
+        if(clazz == null) {
+            synchronized (holder) {
+                clazz = holder.get();
+                if (clazz == null) {
+                    try {
+                        clazz = Class.forName(classname);
+                        holder.set(clazz);
+                    } catch (Throwable e) {
+                        // cannot find the class
+                    }
+                }
+            }
+        }
+        return clazz;
+    }
 
     /**
      * 从jar获取某包下所有类
@@ -214,7 +263,7 @@ public class ClassUtil {
      * @param childPackage 是否遍历子包
      * @return 类的完整名称
      */
-    private static Set<Class<?>> getClassByJar(String jarPath, Class<?> target, boolean childPackage) {
+    private static Set<Class<?>> getClassByJar(String jarPath, boolean childPackage) {
         Set<Class<?>> myClass = Sets.newHashSet();
         String[] jarInfo = jarPath.split("!");
         String jarFilePath = jarInfo[0].substring(jarInfo[0].indexOf("/"));
@@ -230,14 +279,17 @@ public class ClassUtil {
                         if (childPackage) {
                             if (entryName.startsWith(packagePath)) {
                                 entryName = entryName.replace("/", ".").substring(0, entryName.lastIndexOf("."));
-                                Class<?> clazz = Class.forName(entryName);
-                                if(!target.isAssignableFrom(clazz)) {
+                                // Class<?> clazz = Class.forName(entryName);
+                                Class<?> clazz = getClassByName(entryName);
+                                /*if(!target.isAssignableFrom(clazz)) {
                                     continue;
                                 }
                                 if (Modifier.isAbstract(clazz.getModifiers()) || Modifier.isInterface(clazz.getModifiers())) {
                                     continue;
+                                }*/
+                                if(clazz != null) {
+                                    myClass.add(clazz);
                                 }
-                                myClass.add(clazz);
                             }
                         } else {
                             int index = entryName.lastIndexOf("/");
@@ -249,14 +301,17 @@ public class ClassUtil {
                             }
                             if (myPackagePath.equals(packagePath)) {
                                 entryName = entryName.replace("/", ".").substring(0, entryName.lastIndexOf("."));
-                                Class<?> clazz = Class.forName(entryName);
-                                if(!target.isAssignableFrom(clazz)) {
+                                // Class<?> clazz = Class.forName(entryName);
+                                Class<?> clazz = getClassByName(entryName);
+                                /*if(!target.isAssignableFrom(clazz)) {
                                     continue;
                                 }
                                 if (Modifier.isAbstract(clazz.getModifiers()) || Modifier.isInterface(clazz.getModifiers())) {
                                     continue;
+                                }*/
+                                if(clazz != null) {
+                                    myClass.add(clazz);
                                 }
-                                myClass.add(clazz);
                             }
                         }
                     }
@@ -268,53 +323,6 @@ public class ClassUtil {
             // e.printStackTrace();
         }
         return myClass;
-    }
-
-
-
-    public static void findClassJar(final String packName, Class<?> target, List<Class<?>> list){
-        String pathName = packName.replace(".", "/");
-        JarFile jarFile  = null;
-        try {
-            URL url = target.getClassLoader().getResource(pathName);
-            JarURLConnection jarURLConnection  = (JarURLConnection )url.openConnection();
-            jarFile = jarURLConnection.getJarFile();
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("未找到策略资源");
-        }
-
-        Enumeration<JarEntry> jarEntries = jarFile.entries();
-        while (jarEntries.hasMoreElements()) {
-            JarEntry jarEntry = jarEntries.nextElement();
-            String jarEntryName = jarEntry.getName();
-
-            if(jarEntryName.contains(pathName) && !jarEntryName.equals(pathName+"/")){
-                //递归遍历子目录
-                if(jarEntry.isDirectory()){
-                    String clazzName = jarEntry.getName().replace("/", ".");
-                    int endIndex = clazzName.lastIndexOf(".");
-                    String prefix = null;
-                    if (endIndex > 0) {
-                        prefix = clazzName.substring(0, endIndex);
-                    }
-                    findClassJar(prefix, target, list);
-                }
-                if(jarEntry.getName().endsWith(".class")){
-                    Class<?> clazz = null;
-                    try {
-                        clazz = target.getClassLoader().loadClass(jarEntry.getName().replace("/", ".").replace(".class", ""));
-                    } catch (ClassNotFoundException e) {
-                        e.printStackTrace();
-                    }
-                    if(target.isAssignableFrom(clazz)){
-                        list.add(clazz);
-                    }
-                }
-            }
-
-        }
-
     }
 
 }

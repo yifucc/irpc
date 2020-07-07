@@ -13,6 +13,7 @@ import com.ifcc.irpc.utils.LocalIpUtil;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -54,13 +55,16 @@ public class DiscoveryTest {
         }
     }
 
+    @SneakyThrows
     @Test
     void test2() {
-        Set<Class<?>> classes = ClassUtil.getAllSubClass(IConfigLoader.class, "com.ifcc.irpc");
+        Set<Class<?>> classes = ClassUtil.getAllSubClass(IConfigLoader.class, "");
+        Set<Class<?>> set = ClassUtil.getAllClassByPackages(Lists.newArrayList(""));
+//        Set<Class<?>> classes2 = ClassUtil.getAllSubClass(IConfigLoader.class, "com");
 //        ArrayList<Class<?>> list = new ArrayList<>();
         //ClassUtil.findClassJar("com.ifcc", IConfigProvider.class, list);
         System.out.println(classes);
-
+        System.out.println(set);
 
 //        System.out.println(list);
 //        System.out.println(IConfigLoader.class.isAssignableFrom(AbstractConfigLoader.class));
