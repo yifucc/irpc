@@ -179,9 +179,7 @@ public class ClassUtil {
                 URL url;
                 while ( urls.hasMoreElements() ) {
                     url = urls.nextElement();
-//                    System.out.println(url.getPath());
                     String type = url.getProtocol();
-                    System.out.println(type);
                     if ("file".equals(type)) {
                         classes.addAll(getClassByFile(url.getPath(), basePackage));
                     } else if ("jar".equals(type)) {

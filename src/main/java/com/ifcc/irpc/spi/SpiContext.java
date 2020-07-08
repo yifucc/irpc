@@ -5,6 +5,7 @@ import com.ifcc.irpc.codec.serialization.Serialization;
 import com.ifcc.irpc.common.config.IrpcConfig;
 import com.ifcc.irpc.discovery.Discovery;
 import com.ifcc.irpc.registry.Registry;
+import com.ifcc.irpc.spi.annotation.Cell;
 import com.ifcc.irpc.spi.annotation.Inject;
 import lombok.Data;
 
@@ -16,6 +17,7 @@ import java.util.Map;
  * @description
  */
 @Data
+@Cell
 public class SpiContext {
     @Inject
     private IrpcConfig config;

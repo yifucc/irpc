@@ -1,9 +1,10 @@
 package com.ifcc.irpc.spi;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.ifcc.irpc.common.ClassQueryBuilder;
 import com.ifcc.irpc.spi.annotation.Cell;
 import com.ifcc.irpc.spi.factory.ExtensionFactory;
-import com.ifcc.irpc.utils.ClassUtil;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;
@@ -36,34 +37,30 @@ public class ContainerLoad<T> extends AbstractLoad<T>{
     protected Map<String, Class<?>> loadExtensionClass() {
         Map<String, Class<?>> classMap = Maps.newHashMap();
         if (type.isInterface()) {
-            Set<Class<?>> classes = ClassUtil.getAllSubClass(type, "");
-            if(classes.isEmpty()) {
-                throw new IllegalArgumentException("The interface class has no implement class: " + type.getName());
-            }
-            if (classes.size() > 1) {
-                for(Class<?> clazz : classes) {
-                    Cell cell = clazz.getAnnotation(Cell.class);
-                    if(cell == null || StringUtils.isBlank(cell.value())) {
-                        throw new IllegalArgumentException("Multi implement class has no annotation cell or cell'value is empty: " + clazz.getName());
-                    }
-                    classMap.put(cell.value(), clazz);
-                }
-            } else {
-                Class<?> clazz = classes.iterator().next();
+            Set<Class<?>> classes = ClassQueryBuilder.build()
+                    .andBasePackages(Lists.newArrayList("com.ifcc.irpc"))
+                    .andInterfaceClass(type)
+                    .andAnnotationClass(Cell.class)
+                    .toSet();
+            for (Class<?> clazz : classes) {
                 Cell cell = clazz.getAnnotation(Cell.class);
-                String name = clazz.getName();
-                if(cell != null && StringUtils.isNotBlank(cell.value())) {
-                    name = cell.value();
+                if(cell != null) {
+                    String name = type.getName();
+                    if (StringUtils.isNotBlank(cell.value())) {
+                        name = cell.value();
+                    }
+                    classMap.put(name, clazz);
                 }
-                classMap.put(name, clazz);
             }
         } else {
             String name = type.getName();
             Cell cell = type.getAnnotation(Cell.class);
-            if(cell != null && StringUtils.isNotBlank(cell.value())) {
-                name = cell.value();
+            if(cell != null) {
+                if (StringUtils.isNotBlank(cell.value())) {
+                    name = cell.value();
+                }
+                classMap.put(name, type);
             }
-            classMap.put(name, type);
         }
         return classMap;
     }

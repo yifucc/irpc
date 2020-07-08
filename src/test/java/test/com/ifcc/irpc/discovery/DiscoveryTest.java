@@ -13,6 +13,8 @@ import com.ifcc.irpc.utils.LocalIpUtil;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -68,5 +70,10 @@ public class DiscoveryTest {
 
 //        System.out.println(list);
 //        System.out.println(IConfigLoader.class.isAssignableFrom(AbstractConfigLoader.class));
+    }
+
+    @Test
+    void test3() {
+
     }
 }

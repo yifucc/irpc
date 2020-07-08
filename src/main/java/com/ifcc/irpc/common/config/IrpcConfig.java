@@ -1,5 +1,6 @@
 package com.ifcc.irpc.common.config;
 
+import com.ifcc.irpc.spi.annotation.Cell;
 import com.ifcc.irpc.spi.annotation.Config;
 import lombok.Data;
 
@@ -9,6 +10,7 @@ import lombok.Data;
  * @description 配置类
  */
 @Data
+@Cell
 public class IrpcConfig {
     // ============== 服务端配置 ===============
     /**

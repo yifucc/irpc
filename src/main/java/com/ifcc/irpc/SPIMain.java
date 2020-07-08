@@ -23,6 +23,7 @@ public class SPIMain {
             RegistryContext ctx2 = new RegistryContext("ifcc.service.test", "10.101.23.4:9090");
             registry.register(ctx);
             registry.register(ctx2);
+            System.out.println("hello, world");
             Thread.sleep(200000);
         } catch (Exception e) {
             e.printStackTrace();
