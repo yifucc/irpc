@@ -61,6 +61,9 @@ public class EtcdDiscovery implements Discovery {
                             String addr = keyValue.getKey().toString(Charset.forName("utf-8")).replace(key, "");
                             ctx.getServerAddressList().add(addr);
                         }
+                        if(ctx.getServerAddressList().isEmpty()) {
+                            log.error("[EtcdDiscovery] There is no available service provider.");
+                        }
                         return getResponse;
                     }
             );

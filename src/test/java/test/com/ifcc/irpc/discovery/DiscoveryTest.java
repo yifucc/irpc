@@ -60,12 +60,12 @@ public class DiscoveryTest {
     @SneakyThrows
     @Test
     void test2() {
-        Set<Class<?>> classes = ClassUtil.getAllSubClass(IConfigLoader.class, "");
-        Set<Class<?>> set = ClassUtil.getAllClassByPackages(Lists.newArrayList(""));
+//        Set<Class<?>> classes = ClassUtil.getAllSubClass(IConfigLoader.class, "");
+        Set<Class<?>> set = ClassUtil.getAllClassByPackages(Lists.newArrayList("com"));
 //        Set<Class<?>> classes2 = ClassUtil.getAllSubClass(IConfigLoader.class, "com");
 //        ArrayList<Class<?>> list = new ArrayList<>();
         //ClassUtil.findClassJar("com.ifcc", IConfigProvider.class, list);
-        System.out.println(classes);
+//        System.out.println(classes);
         System.out.println(set);
 
 //        System.out.println(list);

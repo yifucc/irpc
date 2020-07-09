@@ -76,8 +76,7 @@ public class ClassUtil {
         return subclasses;
     }
 
-    private static Set<Class<?>> getClassByFile(String path, String basePackage) {
-        Set<Class<?>> subclasses = Sets.newHashSet();
+    private static Set<Class<?>> getClassByFile(String path, String basePackage, Set<Class<?>> subclasses) {
         try {
             List<String> classpaths = Lists.newArrayList();
             listPackages(path, basePackage, classpaths);
@@ -172,6 +171,23 @@ public class ClassUtil {
     public static Set<Class<?>> getAllClassByPackages(List<String> basePackages) {
         Set<Class<?>> classes = Sets.newHashSet();
         for (String basePackage : basePackages) {
+            classes.addAll(getAllClassByPackage(basePackage));
+        }
+        return classes;
+    }
+
+    private static Set<Class<?>> getAllClassByPackage(String basePackage) {
+        Holder<Set<Class<?>>> holder = PACKAGE_CACHE.computeIfAbsent(basePackage, pack -> new Holder<>());
+        Set<Class<?>> classes = holder.get();
+        if (classes != null) {
+            return classes;
+        }
+        synchronized (holder) {
+            classes = holder.get();
+            if (classes != null) {
+                return classes;
+            }
+            classes = Sets.newHashSet();
             try {
                 ClassLoader loader = Thread.currentThread().getContextClassLoader();
                 String packagePath = basePackage.replace(".", "/");
@@ -181,16 +197,17 @@ public class ClassUtil {
                     url = urls.nextElement();
                     String type = url.getProtocol();
                     if ("file".equals(type)) {
-                        classes.addAll(getClassByFile(url.getPath(), basePackage));
+                        getClassByFile(url.getPath(), basePackage, classes);
                     } else if ("jar".equals(type)) {
-                        classes.addAll(getClassByJar(url.getPath(), true));
+                        getClassByJar(url.getPath(), true, classes);
                     }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            holder.set(classes);
+            return classes;
         }
-        return classes;
     }
 
 
@@ -241,7 +258,7 @@ public class ClassUtil {
                     continue;
                 }
                 String jarPath = urlPath + "!/" + packagePath;
-                classes.addAll(getClassByJar(jarPath, childPackage));
+                getClassByJar(jarPath, childPackage, classes);
             }
         }
         return classes;
@@ -273,8 +290,7 @@ public class ClassUtil {
      * @param childPackage 是否遍历子包
      * @return 类的完整名称
      */
-    private static Set<Class<?>> getClassByJar(String jarPath, boolean childPackage) {
-        Set<Class<?>> myClass = Sets.newHashSet();
+    private static Set<Class<?>> getClassByJar(String jarPath, boolean childPackage, Set<Class<?>> myClass) {
         String[] jarInfo = jarPath.split("!");
         String jarFilePath = jarInfo[0].substring(jarInfo[0].indexOf("/"));
         String packagePath = jarInfo[1].substring(1);
