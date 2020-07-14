@@ -51,7 +51,6 @@ public class DiscoveryTest {
                 }
             }.run();
             System.out.println(ctx.getServerAddressList());
-            Thread.sleep(100000);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -74,6 +73,9 @@ public class DiscoveryTest {
 
     @Test
     void test3() {
-
+        ExtensionFactory factory = ExtensionLoad.getExtensionLoad(ExtensionFactory.class).getDefaultExtension();
+        IComsumer consumer = factory.getExtension(IComsumer.class);
+        System.out.println(consumer);
+        System.out.println(consumer.getClass());
     }
 }

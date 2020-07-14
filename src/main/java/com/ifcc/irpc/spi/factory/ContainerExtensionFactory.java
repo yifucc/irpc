@@ -12,6 +12,7 @@ public class ContainerExtensionFactory implements ExtensionFactory {
 
     public ContainerExtensionFactory() {}
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T> T getExtension(Class<T> type, String name) {
         if (type.isInterface() && type.isAnnotationPresent(SPI.class)) {

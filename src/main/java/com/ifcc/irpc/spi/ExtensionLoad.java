@@ -43,6 +43,7 @@ public class ExtensionLoad<T> extends AbstractLoad<T> {
         super.setFactory(factory);
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> ExtensionLoad<T> getExtensionLoad(Class<T> interfaceClass) {
         if (!interfaceClass.isInterface()) {
             throw new IllegalArgumentException("Class is not a interface: " + interfaceClass.getName());

@@ -2,6 +2,7 @@ package com.ifcc.irpc.spi;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.ifcc.irpc.annotation.client.IrpcConsumer;
 import com.ifcc.irpc.common.ClassQueryBuilder;
 import com.ifcc.irpc.spi.annotation.Cell;
 import com.ifcc.irpc.spi.factory.ExtensionFactory;
@@ -26,6 +27,7 @@ public class ContainerLoad<T> extends AbstractLoad<T>{
         this.type = type;
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> ContainerLoad<T> getContainerLoad(Class<T> type) {
         if(type == null) {
             throw new IllegalArgumentException("Class type cannot be null.");
@@ -37,6 +39,11 @@ public class ContainerLoad<T> extends AbstractLoad<T>{
     protected Map<String, Class<?>> loadExtensionClass() {
         Map<String, Class<?>> classMap = Maps.newHashMap();
         if (type.isInterface()) {
+            IrpcConsumer consumer = type.getAnnotation(IrpcConsumer.class);
+            if (consumer != null) {
+                classMap.put(type.getName(), type);
+                return classMap;
+            }
             Set<Class<?>> classes = ClassQueryBuilder.build()
                     .andBasePackages(Lists.newArrayList("com.ifcc.irpc"))
                     .andInterfaceClass(type)

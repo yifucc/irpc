@@ -1,5 +1,7 @@
 package com.ifcc.irpc.spi;
 
+import com.ifcc.irpc.annotation.client.IrpcConsumer;
+import com.ifcc.irpc.client.wrapper.ProxyWrapper;
 import com.ifcc.irpc.common.config.IConfigProvider;
 import com.ifcc.irpc.spi.annotation.Config;
 import com.ifcc.irpc.spi.annotation.ConfigSource;
@@ -45,6 +47,7 @@ public abstract class AbstractLoad<T> {
         this.factory = factory;
     }
 
+    @SuppressWarnings("unchecked")
     public T getExtension(String name) {
         if (StringUtils.isBlank(name)) {
             throw new IllegalArgumentException("Extension name cannot be null or empty.");
@@ -66,12 +69,26 @@ public abstract class AbstractLoad<T> {
         return new TreeSet<>(getExtensionClasses().keySet());
     }
 
+    @SuppressWarnings("unchecked")
     protected T createExtension(String name) {
         Class<?> clazz = this.getExtensionClasses().get(name);
         if (clazz == null) {
             return null;
         }
         try {
+            if (clazz.isInterface()) {
+                IrpcConsumer consumer = clazz.getAnnotation(IrpcConsumer.class);
+                if (consumer != null) {
+                    ProxyWrapper<T> wrapper = new ProxyWrapper(clazz);
+                    this.injectExtension(wrapper);
+                    this.initExtension(wrapper);
+                    T instance = wrapper.getObject();
+                    instances.put(name, instance);
+                    return instance;
+                } else {
+                    throw new IllegalArgumentException("Interface cannot new a instance: " + clazz.getName());
+                }
+            }
             T instance = (T)clazz.newInstance();
             instances.put(name, instance);
             // 依赖注入
@@ -94,11 +111,12 @@ public abstract class AbstractLoad<T> {
         return extensionClasses;
     }
 
-    private T initExtension(T instance) {
+    private Object initExtension(Object instance) {
         try {
-            Method init = instance.getClass().getDeclaredMethod("init", null);
+            Method init = instance.getClass().getDeclaredMethod("init");
             if (init != null) {
-                init.invoke(instance, null);
+                init.setAccessible(true);
+                init.invoke(instance);
             }
         } catch (Exception e) {
             return instance;
@@ -106,7 +124,8 @@ public abstract class AbstractLoad<T> {
         return instance;
     }
 
-    private T injectExtension(T instance) {
+    @SuppressWarnings("unchecked")
+    private Object injectExtension(Object instance) {
         if(instance == null) {
             return instance;
         }
@@ -137,6 +156,9 @@ public abstract class AbstractLoad<T> {
                     String value = PlaceholderUtil.resolveStringValue(props, config.value());
                     if (StringUtils.isBlank(value) && config.required()) {
                         throw new IllegalStateException("The config cannot be empty: " + config.value());
+                    }
+                    if (value == null) {
+                        continue;
                     }
                     field.setAccessible(true);
                     if (field.getType().isAssignableFrom(int.class) || field.getType().isAssignableFrom(Integer.class)) {
