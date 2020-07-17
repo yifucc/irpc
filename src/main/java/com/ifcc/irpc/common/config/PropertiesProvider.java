@@ -23,7 +23,7 @@ public class PropertiesProvider implements IConfigProvider<Properties> {
         return propertiesMap.computeIfAbsent(filePath, path -> {
             Properties props = new Properties();
             try {
-                props.load(ClassLoader.getSystemResourceAsStream(filePath));
+                props.load(this.getClass().getClassLoader().getResourceAsStream(filePath));
             } catch (Exception e) {
                 e.printStackTrace();
             }

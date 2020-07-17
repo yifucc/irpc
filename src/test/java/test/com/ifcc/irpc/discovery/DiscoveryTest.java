@@ -13,6 +13,7 @@ import com.ifcc.irpc.utils.LocalIpUtil;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -77,5 +78,14 @@ public class DiscoveryTest {
         IComsumer consumer = factory.getExtension(IComsumer.class);
         System.out.println(consumer);
         System.out.println(consumer.getClass());
+    }
+
+    @Test
+    void test4() {
+        File file = new File(new File(System.getProperty("user.home")), "irpc.properties");
+        System.out.println(file.exists());
+        System.out.println(System.getProperty("user.home"));
+        String path = this.getClass().getClassLoader().getResource("irpc.properties").getPath();
+        System.out.println(path);
     }
 }
