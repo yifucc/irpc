@@ -1,7 +1,7 @@
 package com.ifcc.irpc.client.wrapper;
 
+import com.ifcc.irpc.common.URL;
 import com.ifcc.irpc.discovery.Discovery;
-import com.ifcc.irpc.discovery.DiscoveryContext;
 import com.ifcc.irpc.spi.annotation.Inject;
 import com.ifcc.irpc.utils.LocalIpUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -11,7 +11,6 @@ import java.io.FileInputStream;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.net.URL;
 import java.util.Properties;
 
 /**
@@ -21,7 +20,7 @@ import java.util.Properties;
  */
 public class ProxyWrapper<T> {
     private Class<T> interfaceClass;
-    private DiscoveryContext context;
+    private URL url;
     private T proxy;
 
     @Inject
@@ -41,7 +40,7 @@ public class ProxyWrapper<T> {
         if(StringUtils.isBlank(resolve)) {
             resolveFile = System.getProperty("irpc.resolve.file");
             if (StringUtils.isBlank(resolveFile)) {
-                URL resource = this.getClass().getClassLoader().getResource("irpc.properties");
+                java.net.URL resource = this.getClass().getClassLoader().getResource("irpc.properties");
                 if(resource != null) {
                     resolveFile = resource.getPath();
                 }
@@ -66,9 +65,9 @@ public class ProxyWrapper<T> {
                 resolve = props.getProperty(interfaceClass.getName());
             }
         }
-        context = new DiscoveryContext(interfaceClass.getName(), LocalIpUtil.localRealIp());
+        url = new URL(LocalIpUtil.localRealIp(), interfaceClass.getName());
         try {
-            discovery.discover(context);
+            discovery.discover(url);
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -1,5 +1,7 @@
 package com.ifcc.irpc.registry.etcd;
 
+import com.ifcc.irpc.codec.serialization.Serialization;
+import com.ifcc.irpc.codec.serialization.msgpack.MsgpackSerialization;
 import com.ifcc.irpc.common.Const;
 import com.ifcc.irpc.common.URL;
 import com.ifcc.irpc.exceptions.RegistryServiceFailedException;
@@ -29,6 +31,8 @@ public class EtcdRegistry implements Registry {
     @Inject
     private EtcdBuilder etcdBuilder;
 
+    private Serialization serialization = new MsgpackSerialization();
+
     public EtcdRegistry(EtcdBuilder etcdBuilder) {
         this.etcdBuilder = etcdBuilder;
     }
@@ -42,7 +46,7 @@ public class EtcdRegistry implements Registry {
         String key = MessageFormat.format("{0}/{1}{2}/{3}", Const.ZK_REGISTRY_PATH, url.getService(), Const.ZK_PROVIDERS_PATH, registerUrl);
         try {
             KV kv = etcd.getKVClient();
-            CompletableFuture<PutResponse> future = kv.put(ByteSequence.from(key, Charset.forName("utf-8")), ByteSequence.EMPTY, PutOption.newBuilder().withLeaseId(etcdBuilder.leaseId()).build());
+            CompletableFuture<PutResponse> future = kv.put(ByteSequence.from(key, Charset.forName("utf-8")), ByteSequence.from(serialization.marshal(url)), PutOption.newBuilder().withLeaseId(etcdBuilder.leaseId()).build());
             future.handleAsync(
                 (PutResponse putResponse, Throwable throwable) -> {
                     if (throwable != null) {

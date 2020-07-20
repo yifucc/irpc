@@ -1,5 +1,6 @@
 package com.ifcc.irpc.discovery;
 
+import com.ifcc.irpc.common.URL;
 import com.ifcc.irpc.exceptions.DiscoveryServiceFailedException;
 import com.ifcc.irpc.spi.annotation.SPI;
 
@@ -10,5 +11,5 @@ import com.ifcc.irpc.spi.annotation.SPI;
  */
 @SPI("zookeeper")
 public interface Discovery {
-    void discover(DiscoveryContext ctx) throws DiscoveryServiceFailedException;
+    void discover(URL url) throws DiscoveryServiceFailedException;
 }

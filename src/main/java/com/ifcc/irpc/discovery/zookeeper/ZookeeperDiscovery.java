@@ -1,8 +1,10 @@
 package com.ifcc.irpc.discovery.zookeeper;
 
+import com.ifcc.irpc.codec.serialization.Serialization;
+import com.ifcc.irpc.codec.serialization.msgpack.MsgpackSerialization;
 import com.ifcc.irpc.common.Const;
+import com.ifcc.irpc.common.URL;
 import com.ifcc.irpc.discovery.Discovery;
-import com.ifcc.irpc.discovery.DiscoveryContext;
 import com.ifcc.irpc.exceptions.DiscoveryServiceFailedException;
 import com.ifcc.irpc.registry.zookeeper.ZookeeperBuilder;
 import com.ifcc.irpc.spi.annotation.Inject;
@@ -27,6 +29,8 @@ public class ZookeeperDiscovery implements Discovery, AsyncCallback.ChildrenCall
     @Inject
     private ZookeeperBuilder zookeeperBuilder;
 
+    private Serialization serialization = new MsgpackSerialization();
+
     public ZookeeperDiscovery(ZookeeperBuilder zookeeperBuilder) {
         this.zookeeperBuilder = zookeeperBuilder;
     }
@@ -34,18 +38,18 @@ public class ZookeeperDiscovery implements Discovery, AsyncCallback.ChildrenCall
     public ZookeeperDiscovery() {}
 
     @Override
-    public void discover(DiscoveryContext ctx) throws DiscoveryServiceFailedException {
+    public void discover(URL url) throws DiscoveryServiceFailedException {
         try {
             ZooKeeper zk = zookeeperBuilder.zkCli();
             // 获取对应provider下所有的子节点
-            zk.getChildren(Const.ZK_REGISTRY_PATH + Const.DIAGONAL + ctx.getService() + Const.ZK_PROVIDERS_PATH,
+            zk.getChildren(Const.ZK_REGISTRY_PATH + Const.DIAGONAL + url.getService() + Const.ZK_PROVIDERS_PATH,
                     (WatchedEvent event) -> {
                         try {
-                            discover(ctx);
+                            discover(url);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-                    }, this, ctx);
+                    }, this, url);
         } catch (Exception e) {
             throw new DiscoveryServiceFailedException("[ZookeeperDiscovery] Zookeeper discovery service failed.", e);
         }
@@ -54,23 +58,27 @@ public class ZookeeperDiscovery implements Discovery, AsyncCallback.ChildrenCall
 
     @Override
     public void processResult(int rc, String path, Object ctx, List<String> children) {
-        DiscoveryContext context = (DiscoveryContext) ctx;
+        URL url = (URL) ctx;
         switch (KeeperException.Code.get(rc)) {
             case OK:
-                context.getServerAddressList().clear();
-                if (children != null) {
-                    context.getServerAddressList().addAll(children);
-                }
-                if (children == null || children.isEmpty()) {
-                    log.error("[ZookeeperDiscovery] There is no available service provider.");
-                }
                 try {
                     ZooKeeper zk = zookeeperBuilder.zkCli();
-                    if (zk.exists(Const.ZK_REGISTRY_PATH + Const.DIAGONAL + context.getService() + Const.ZK_CONSUMERS_PATH, null) == null) {
-                        zk.create(Const.ZK_REGISTRY_PATH + Const.DIAGONAL + context.getService() + Const.ZK_CONSUMERS_PATH, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+                    url.getUrls().clear();
+                    if (children != null) {
+                        for (String child : children) {
+                            byte[] data = zk.getData(path + Const.DIAGONAL + child, false, null);
+                            url.getUrls().put(child, serialization.unMarshal(URL.class, data));
+                        }
                     }
-                    if (zk.exists(Const.ZK_REGISTRY_PATH + Const.DIAGONAL + context.getService() + Const.ZK_CONSUMERS_PATH + Const.DIAGONAL + context.getIp(), null) == null) {
-                        zk.create(Const.ZK_REGISTRY_PATH + Const.DIAGONAL + context.getService() + Const.ZK_CONSUMERS_PATH + Const.DIAGONAL + context.getIp(), null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
+                    if (children == null || children.isEmpty()) {
+                        log.error("[ZookeeperDiscovery] There is no available service provider.");
+                    }
+
+                    if (zk.exists(Const.ZK_REGISTRY_PATH + Const.DIAGONAL + url.getService() + Const.ZK_CONSUMERS_PATH, null) == null) {
+                        zk.create(Const.ZK_REGISTRY_PATH + Const.DIAGONAL + url.getService() + Const.ZK_CONSUMERS_PATH, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+                    }
+                    if (zk.exists(Const.ZK_REGISTRY_PATH + Const.DIAGONAL + url.getService() + Const.ZK_CONSUMERS_PATH + Const.DIAGONAL + url.getHost(), null) == null) {
+                        zk.create(Const.ZK_REGISTRY_PATH + Const.DIAGONAL + url.getService() + Const.ZK_CONSUMERS_PATH + Const.DIAGONAL + url.getHost(), null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
                     }
                 } catch (Exception e) {
                     log.error("[ZookeeperDiscovery] Create zookeeper discovery node failed.", e);
@@ -83,7 +91,7 @@ public class ZookeeperDiscovery implements Discovery, AsyncCallback.ChildrenCall
                 log.error("[ZookeeperDiscovery] Zookeeper discovery service failed, error code: {}, msg: {}, path: {}", rc, KeeperException.Code.get(rc).toString(), path);
                 try {
                     Thread.sleep(10000);
-                    discover(context);
+                    discover(url);
                 } catch (Exception e) {
                     log.error("[ZookeeperDiscovery] Zookeeper discovery service failed.", e);
                 }

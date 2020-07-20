@@ -1,5 +1,7 @@
 package com.ifcc.irpc.registry.zookeeper;
 
+import com.ifcc.irpc.codec.serialization.Serialization;
+import com.ifcc.irpc.codec.serialization.msgpack.MsgpackSerialization;
 import com.ifcc.irpc.common.Const;
 import com.ifcc.irpc.common.URL;
 import com.ifcc.irpc.exceptions.RegistryServiceFailedException;
@@ -25,6 +27,8 @@ public class ZookeeperRegistry implements Registry, AsyncCallback.StringCallback
     @Inject
     private ZookeeperBuilder zookeeperBuilder;
 
+    private Serialization serialization = new MsgpackSerialization();
+
     public ZookeeperRegistry(ZookeeperBuilder zookeeperBuilder) {
         this.zookeeperBuilder = zookeeperBuilder;
     }
@@ -45,7 +49,7 @@ public class ZookeeperRegistry implements Registry, AsyncCallback.StringCallback
                 zk.create(Const.ZK_REGISTRY_PATH + Const.DIAGONAL + url.getService() + Const.ZK_PROVIDERS_PATH, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT, this, url);
             }
             String registerUrl = url.getHost() + Const.COLON + url.getPort();
-            zk.create(Const.ZK_REGISTRY_PATH + Const.DIAGONAL + url.getService() + Const.ZK_PROVIDERS_PATH + Const.DIAGONAL + registerUrl, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL, this, url);
+            zk.create(Const.ZK_REGISTRY_PATH + Const.DIAGONAL + url.getService() + Const.ZK_PROVIDERS_PATH + Const.DIAGONAL + registerUrl, serialization.marshal(url), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL, this, url);
             if (!url.getHasWatched().get()) {
                 watchNode(url);
             }

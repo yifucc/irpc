@@ -1,8 +1,10 @@
 package com.ifcc.irpc.discovery.etcd;
 
+import com.ifcc.irpc.codec.serialization.Serialization;
+import com.ifcc.irpc.codec.serialization.msgpack.MsgpackSerialization;
 import com.ifcc.irpc.common.Const;
+import com.ifcc.irpc.common.URL;
 import com.ifcc.irpc.discovery.Discovery;
-import com.ifcc.irpc.discovery.DiscoveryContext;
 import com.ifcc.irpc.exceptions.DiscoveryServiceFailedException;
 import com.ifcc.irpc.registry.etcd.EtcdBuilder;
 import com.ifcc.irpc.spi.annotation.Inject;
@@ -32,6 +34,8 @@ public class EtcdDiscovery implements Discovery {
     @Inject
     private EtcdBuilder builder;
 
+    private Serialization serialization = new MsgpackSerialization();
+
     public EtcdDiscovery(EtcdBuilder builder) {
         this.builder = builder;
     }
@@ -39,38 +43,39 @@ public class EtcdDiscovery implements Discovery {
     public EtcdDiscovery() {}
 
     @Override
-    public void discover(DiscoveryContext ctx) throws DiscoveryServiceFailedException {
+    public void discover(URL url) throws DiscoveryServiceFailedException {
         try {
             Client etcd = builder.etcdCli();
             KV kv = etcd.getKVClient();
-            String key = MessageFormat.format("{0}/{1}{2}/", Const.ZK_REGISTRY_PATH, ctx.getService(), Const.ZK_PROVIDERS_PATH);
+            String key = MessageFormat.format("{0}/{1}{2}/", Const.ZK_REGISTRY_PATH, url.getService(), Const.ZK_PROVIDERS_PATH);
             CompletableFuture<GetResponse> future = kv.get(ByteSequence.from(key, Charset.forName("utf-8")), GetOption.newBuilder().withPrefix(ByteSequence.from(key, Charset.forName("utf-8"))).build());
             future.handleAsync(
                     (GetResponse getResponse, Throwable throwable) -> {
                         if (throwable != null) {
                             try {
                                 Thread.sleep(10000);
-                                discover(ctx);
+                                discover(url);
                                 return null;
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
                         }
-                        ctx.getServerAddressList().clear();
+                        url.getUrls().clear();
                         for (KeyValue keyValue : getResponse.getKvs()) {
                             String addr = keyValue.getKey().toString(Charset.forName("utf-8")).replace(key, "");
-                            ctx.getServerAddressList().add(addr);
+                            URL discoveryUrl = serialization.unMarshal(URL.class, keyValue.getValue().getBytes());
+                            url.getUrls().put(addr, discoveryUrl);
                         }
-                        if(ctx.getServerAddressList().isEmpty()) {
+                        if(url.getUrls().isEmpty()) {
                             log.error("[EtcdDiscovery] There is no available service provider.");
                         }
                         return getResponse;
                     }
             );
-            if (!ctx.getHasWatched()) {
-                watch(key, ctx);
+            if (!url.getHasWatched().get()) {
+                watch(key, url);
             }
-            String consumerKey = MessageFormat.format("{0}/{1}{2}/{3}", Const.ZK_REGISTRY_PATH, ctx.getService(), Const.ZK_CONSUMERS_PATH, ctx.getIp());
+            String consumerKey = MessageFormat.format("{0}/{1}{2}/{3}", Const.ZK_REGISTRY_PATH, url.getService(), Const.ZK_CONSUMERS_PATH, url.getHost());
             kv.put(ByteSequence.from(consumerKey, Charset.forName("utf-8")), ByteSequence.EMPTY, PutOption.newBuilder().withLeaseId(builder.leaseId()).build());
 
         } catch (Exception e) {
@@ -78,12 +83,12 @@ public class EtcdDiscovery implements Discovery {
         }
     }
 
-    private void watch(String key, DiscoveryContext ctx) {
+    private void watch(String key, URL url) {
         Watch watch = builder.etcdCli().getWatchClient();
         watch.watch(ByteSequence.from(key, Charset.forName("utf-8")), WatchOption.newBuilder().withPrefix(ByteSequence.from(key, Charset.forName("utf-8"))).build(),
                 res -> {
                     try {
-                        discover(ctx);
+                        discover(url);
                     } catch (Exception e) {
                         log.error("", e);
                     }
@@ -94,8 +99,8 @@ public class EtcdDiscovery implements Discovery {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                    watch(key, ctx);
+                    watch(key, url);
                 });
-        ctx.setHasWatched(true);
+        url.getHasWatched().set(true);
     }
 }

@@ -40,6 +40,10 @@ public class URL implements Serializable {
         this(host, port, service, Maps.newHashMap());
     }
 
+    public URL(String host, String service) {
+        this(host, -1, service, Maps.newHashMap());
+    }
+
     public URL() {}
 
     public void putParameter(String key, String value) {

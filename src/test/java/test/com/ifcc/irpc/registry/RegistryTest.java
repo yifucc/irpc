@@ -22,6 +22,7 @@ public class RegistryTest {
         try {
             URL ctx = new URL("10.101.23.3", 9090, "ifcc.service.test");
             URL ctx2 = new URL("10.101.23.4",9090,"ifcc.service.test");
+            ctx.putParameter("timestamp", System.currentTimeMillis() + "");
             registry.register(ctx);
             registry.register(ctx2);
             latch.await();

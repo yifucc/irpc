@@ -8,6 +8,7 @@ import lombok.Data;
  * @description
  */
 @Data
+@Deprecated
 public class RegistryContext {
     private String service;
     private String url;

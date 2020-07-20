@@ -2,10 +2,10 @@ package test.com.ifcc.irpc.discovery;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.Lists;
+import com.ifcc.irpc.common.URL;
 import com.ifcc.irpc.common.config.IConfigLoader;
 import com.ifcc.irpc.common.config.IConfigProvider;
 import com.ifcc.irpc.discovery.Discovery;
-import com.ifcc.irpc.discovery.DiscoveryContext;
 import com.ifcc.irpc.spi.ExtensionLoad;
 import com.ifcc.irpc.spi.factory.ExtensionFactory;
 import com.ifcc.irpc.utils.ClassUtil;
@@ -30,10 +30,11 @@ public class DiscoveryTest {
     void test() {
         Discovery discovery = ExtensionLoad.getExtensionLoad(ExtensionFactory.class).getDefaultExtension().getExtension(Discovery.class);
         System.out.println(LocalIpUtil.localRealIp());
-        DiscoveryContext ctx = new DiscoveryContext("ifcc.service.test", LocalIpUtil.localRealIp());
-        DiscoveryContext ctx2 = new DiscoveryContext("ifcc.irpc.test", LocalIpUtil.localRealIp());
+        URL ctx = new URL(LocalIpUtil.localRealIp(), "ifcc.service.test");
+        URL ctx2 = new URL(LocalIpUtil.localRealIp(), "ifcc.irpc.test");
         try {
             discovery.discover(ctx);
+            //discovery.discover(ctx2);
             new Runnable() {
 
                 @SneakyThrows
@@ -44,14 +45,13 @@ public class DiscoveryTest {
                         if (time > 10000) {
                             break;
                         }
-                        System.out.println(ctx.getServerAddressList());
-                        System.out.println(ctx2.getServerAddressList());
+                        System.out.println(ctx.getUrls());
+                        System.out.println(ctx2.getUrls());
                         time++;
                         Thread.sleep(5000);
                     }
                 }
             }.run();
-            System.out.println(ctx.getServerAddressList());
         } catch (Exception e) {
             e.printStackTrace();
         }

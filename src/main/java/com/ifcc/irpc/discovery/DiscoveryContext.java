@@ -11,6 +11,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @description
  */
 @Data
+@Deprecated
 public class DiscoveryContext {
     private String service;
     private String ip;
