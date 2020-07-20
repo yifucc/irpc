@@ -1,5 +1,6 @@
 package com.ifcc.irpc.registry;
 
+import com.ifcc.irpc.common.URL;
 import com.ifcc.irpc.exceptions.RegistryServiceFailedException;
 import com.ifcc.irpc.spi.annotation.SPI;
 
@@ -13,5 +14,5 @@ import com.ifcc.irpc.spi.annotation.SPI;
 @SPI("zookeeper")
 public interface Registry {
 
-    void register(RegistryContext ctx) throws RegistryServiceFailedException;
+    void register(URL url) throws RegistryServiceFailedException;
 }

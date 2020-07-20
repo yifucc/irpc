@@ -1,9 +1,9 @@
 package com.ifcc.irpc.registry.zookeeper;
 
 import com.ifcc.irpc.common.Const;
+import com.ifcc.irpc.common.URL;
 import com.ifcc.irpc.exceptions.RegistryServiceFailedException;
 import com.ifcc.irpc.registry.Registry;
-import com.ifcc.irpc.registry.RegistryContext;
 import com.ifcc.irpc.spi.annotation.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.zookeeper.AsyncCallback;
@@ -32,34 +32,36 @@ public class ZookeeperRegistry implements Registry, AsyncCallback.StringCallback
     public ZookeeperRegistry() {}
 
     @Override
-    public void register(RegistryContext ctx) throws RegistryServiceFailedException {
+    public void register(URL url) throws RegistryServiceFailedException {
         try {
             ZooKeeper zk = zookeeperBuilder.zkCli();
             if (zk.exists(Const.ZK_REGISTRY_PATH, null) == null) {
-                zk.create(Const.ZK_REGISTRY_PATH, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT, this, ctx);
+                zk.create(Const.ZK_REGISTRY_PATH, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT, this, url);
             }
-            if (zk.exists(Const.ZK_REGISTRY_PATH + Const.DIAGONAL + ctx.getService(), null) == null) {
-                zk.create(Const.ZK_REGISTRY_PATH + Const.DIAGONAL + ctx.getService(), null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT, this, ctx);
+            if (zk.exists(Const.ZK_REGISTRY_PATH + Const.DIAGONAL + url.getService(), null) == null) {
+                zk.create(Const.ZK_REGISTRY_PATH + Const.DIAGONAL + url.getService(), null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT, this, url);
             }
-            if (zk.exists(Const.ZK_REGISTRY_PATH + Const.DIAGONAL + ctx.getService() + Const.ZK_PROVIDERS_PATH, null) == null) {
-                zk.create(Const.ZK_REGISTRY_PATH + Const.DIAGONAL + ctx.getService() + Const.ZK_PROVIDERS_PATH, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT, this, ctx);
+            if (zk.exists(Const.ZK_REGISTRY_PATH + Const.DIAGONAL + url.getService() + Const.ZK_PROVIDERS_PATH, null) == null) {
+                zk.create(Const.ZK_REGISTRY_PATH + Const.DIAGONAL + url.getService() + Const.ZK_PROVIDERS_PATH, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT, this, url);
             }
-            zk.create(Const.ZK_REGISTRY_PATH + Const.DIAGONAL + ctx.getService() + Const.ZK_PROVIDERS_PATH + Const.DIAGONAL + ctx.getUrl(), null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL, this, ctx);
-            if (!ctx.getHasWatched()) {
-                watchNode(ctx);
+            String registerUrl = url.getHost() + Const.COLON + url.getPort();
+            zk.create(Const.ZK_REGISTRY_PATH + Const.DIAGONAL + url.getService() + Const.ZK_PROVIDERS_PATH + Const.DIAGONAL + registerUrl, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL, this, url);
+            if (!url.getHasWatched().get()) {
+                watchNode(url);
             }
         } catch (Exception e) {
             throw new RegistryServiceFailedException("[ZookeeperRegistry] Zookeeper register service failed.", e);
         }
     }
 
-    private void watchNode(RegistryContext ctx) throws RegistryServiceFailedException {
+    private void watchNode(URL url) throws RegistryServiceFailedException {
         try {
             ZooKeeper zk = zookeeperBuilder.zkCli();
-            zk.exists(Const.ZK_REGISTRY_PATH + Const.DIAGONAL + ctx.getService() + Const.ZK_PROVIDERS_PATH + Const.DIAGONAL + ctx.getUrl(),
+            String registerUrl = url.getHost() + Const.COLON + url.getPort();
+            zk.exists(Const.ZK_REGISTRY_PATH + Const.DIAGONAL + url.getService() + Const.ZK_PROVIDERS_PATH + Const.DIAGONAL + registerUrl,
                     (WatchedEvent event) -> {
                         try {
-                            watchNode(ctx);
+                            watchNode(url);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -68,7 +70,7 @@ public class ZookeeperRegistry implements Registry, AsyncCallback.StringCallback
                             case OK:
                                 if (stat == null) {
                                     try {
-                                        register(ctx);
+                                        register(url);
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                     }
@@ -76,13 +78,13 @@ public class ZookeeperRegistry implements Registry, AsyncCallback.StringCallback
                                 break;
                             default:
                                 try {
-                                    register(ctx);
+                                    register(url);
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
                         }
-                    }, ctx);
-            ctx.setHasWatched(true);
+                    }, url);
+            url.getHasWatched().set(true);
         } catch (Exception e) {
             throw new RegistryServiceFailedException("[ZookeeperRegistry] Zookeeper register service failed.", e);
         }
@@ -90,10 +92,10 @@ public class ZookeeperRegistry implements Registry, AsyncCallback.StringCallback
 
     @Override
     public void processResult(int rc, String path, Object ctx, String name) {
-        RegistryContext context = (RegistryContext) ctx;
+        URL url = (URL) ctx;
         switch (KeeperException.Code.get(rc)) {
             case OK:
-                log.info("[ZookeeperRegistry] service: {} registered to zookeeper successfully.", context.getService());
+                log.info("[ZookeeperRegistry] service: {} registered to zookeeper successfully.", url.getService());
                 break;
             case NODEEXISTS:
                 break;
@@ -103,7 +105,7 @@ public class ZookeeperRegistry implements Registry, AsyncCallback.StringCallback
                 log.error("[ZookeeperRegistry] Zookeeper register service failed, error code: {}, msg: {}", rc, KeeperException.Code.get(rc).toString());
                 try {
                     Thread.sleep(10000);
-                    this.register(context);
+                    this.register(url);
                 } catch (Exception e) {
                     log.error("[ZookeeperRegistry] Zookeeper register service failed.", e);
                 }

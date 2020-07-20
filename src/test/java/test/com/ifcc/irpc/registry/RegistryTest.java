@@ -1,7 +1,7 @@
 package test.com.ifcc.irpc.registry;
 
+import com.ifcc.irpc.common.URL;
 import com.ifcc.irpc.registry.Registry;
-import com.ifcc.irpc.registry.RegistryContext;
 import com.ifcc.irpc.spi.ExtensionLoad;
 import com.ifcc.irpc.spi.factory.ExtensionFactory;
 import org.junit.jupiter.api.Test;
@@ -20,8 +20,8 @@ public class RegistryTest {
         CountDownLatch latch = new CountDownLatch(1);
         Registry registry = ExtensionLoad.getExtensionLoad(ExtensionFactory.class).getDefaultExtension().getExtension(Registry.class);
         try {
-            RegistryContext ctx = new RegistryContext("ifcc.service.test", "10.101.23.3:9090");
-            RegistryContext ctx2 = new RegistryContext("ifcc.service.test", "10.101.23.4:9090");
+            URL ctx = new URL("10.101.23.3", 9090, "ifcc.service.test");
+            URL ctx2 = new URL("10.101.23.4",9090,"ifcc.service.test");
             registry.register(ctx);
             registry.register(ctx2);
             latch.await();

@@ -1,9 +1,9 @@
 package com.ifcc.irpc.registry.etcd;
 
 import com.ifcc.irpc.common.Const;
+import com.ifcc.irpc.common.URL;
 import com.ifcc.irpc.exceptions.RegistryServiceFailedException;
 import com.ifcc.irpc.registry.Registry;
-import com.ifcc.irpc.registry.RegistryContext;
 import com.ifcc.irpc.spi.annotation.Inject;
 import io.etcd.jetcd.ByteSequence;
 import io.etcd.jetcd.Client;
@@ -36,9 +36,10 @@ public class EtcdRegistry implements Registry {
     public EtcdRegistry() {}
 
     @Override
-    public void register(RegistryContext ctx) throws RegistryServiceFailedException {
+    public void register(URL url) throws RegistryServiceFailedException {
         Client etcd = etcdBuilder.etcdCli();
-        String key = MessageFormat.format("{0}/{1}{2}/{3}", Const.ZK_REGISTRY_PATH, ctx.getService(), Const.ZK_PROVIDERS_PATH, ctx.getUrl());
+        String registerUrl = url.getHost() + Const.COLON + url.getPort();
+        String key = MessageFormat.format("{0}/{1}{2}/{3}", Const.ZK_REGISTRY_PATH, url.getService(), Const.ZK_PROVIDERS_PATH, registerUrl);
         try {
             KV kv = etcd.getKVClient();
             CompletableFuture<PutResponse> future = kv.put(ByteSequence.from(key, Charset.forName("utf-8")), ByteSequence.EMPTY, PutOption.newBuilder().withLeaseId(etcdBuilder.leaseId()).build());
@@ -47,25 +48,25 @@ public class EtcdRegistry implements Registry {
                     if (throwable != null) {
                         try {
                             Thread.sleep(10000);
-                            register(ctx);
+                            register(url);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
                     }
-                    log.info("[EtcdRegistry] service: {} registered to etcd successfully.", ctx.getService());
+                    log.info("[EtcdRegistry] service: {} registered to etcd successfully.", url.getService());
                     return putResponse;
                 }
             );
             kv.txn();
-            if (!ctx.getHasWatched()) {
-                watch(key, ctx);
+            if (!url.getHasWatched().get()) {
+                watch(key, url);
             }
         } catch (Exception e) {
             throw new RegistryServiceFailedException("[EtcdRegistry] Etcd register service failed.", e);
         }
     }
 
-    private void watch(String key, RegistryContext ctx) {
+    private void watch(String key, URL url) {
         Client etcd = etcdBuilder.etcdCli();
         Watch watch = etcd.getWatchClient();
         watch.watch(ByteSequence.from(key, Charset.forName("utf-8")),
@@ -73,7 +74,7 @@ public class EtcdRegistry implements Registry {
             for (WatchEvent event : response.getEvents()) {
                 if (WatchEvent.EventType.DELETE == event.getEventType()) {
                     try {
-                        register(ctx);
+                        register(url);
                         break;
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -88,9 +89,9 @@ public class EtcdRegistry implements Registry {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            watch(key, ctx);
+            watch(key, url);
                 });
-        ctx.setHasWatched(true);
+        url.getHasWatched().set(true);
     }
 
 

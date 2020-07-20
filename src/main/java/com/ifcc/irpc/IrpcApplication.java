@@ -3,9 +3,9 @@ package com.ifcc.irpc;
 import com.ifcc.irpc.annotation.server.IrpcProvider;
 import com.ifcc.irpc.annotation.server.IrpcServer;
 import com.ifcc.irpc.common.ClassQueryBuilder;
+import com.ifcc.irpc.common.URL;
 import com.ifcc.irpc.common.config.IrpcConfig;
 import com.ifcc.irpc.registry.Registry;
-import com.ifcc.irpc.registry.RegistryContext;
 import com.ifcc.irpc.spi.ExtensionLoad;
 import com.ifcc.irpc.spi.factory.ExtensionFactory;
 import com.ifcc.irpc.utils.LocalIpUtil;
@@ -30,9 +30,9 @@ public final class IrpcApplication {
         Registry registry = extension.getExtension(Registry.class);
         IrpcConfig config = extension.getExtension(IrpcConfig.class);
         for (Class<?> c : classes) {
-            RegistryContext ctx = new RegistryContext(c.getName(), LocalIpUtil.localRealIp() + ":" + config.getPort());
+            URL url = new URL(LocalIpUtil.localRealIp(), config.getPort(), c.getName());
             try {
-                registry.register(ctx);
+                registry.register(url);
             } catch (Exception e) {
                 e.printStackTrace();
             }
