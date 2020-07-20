@@ -2,7 +2,9 @@ package com.ifcc.irpc.common.config;
 
 import com.ifcc.irpc.spi.annotation.Cell;
 import com.ifcc.irpc.spi.annotation.Config;
+import com.ifcc.irpc.utils.LocalIpUtil;
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author chenghaifeng
@@ -26,6 +28,12 @@ public class IrpcConfig {
      */
     @Config("${irpc.server.accepts:100}")
     private int accepts;
+
+    /**
+     * 服务端地址
+     */
+    @Config(value = "${irpc.server.address}", required = false)
+    private String address;
 
     // ============== 客户端配置 ===============
     /**
@@ -57,4 +65,10 @@ public class IrpcConfig {
      */
     @Config("${irpc.registryAddress}")
     private String registryAddress;
+
+    public void init() {
+        if (StringUtils.isBlank(address)) {
+            address = LocalIpUtil.localRealIp();
+        }
+    }
 }

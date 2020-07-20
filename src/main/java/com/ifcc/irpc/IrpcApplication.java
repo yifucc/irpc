@@ -8,7 +8,6 @@ import com.ifcc.irpc.common.config.IrpcConfig;
 import com.ifcc.irpc.registry.Registry;
 import com.ifcc.irpc.spi.ExtensionLoad;
 import com.ifcc.irpc.spi.factory.ExtensionFactory;
-import com.ifcc.irpc.utils.LocalIpUtil;
 
 import java.util.Arrays;
 import java.util.Set;
@@ -29,8 +28,11 @@ public final class IrpcApplication {
         ExtensionFactory extension = ExtensionLoad.getExtensionLoad(ExtensionFactory.class).getDefaultExtension();
         Registry registry = extension.getExtension(Registry.class);
         IrpcConfig config = extension.getExtension(IrpcConfig.class);
+        // 启动时间
+        long startTime = System.currentTimeMillis();
         for (Class<?> c : classes) {
-            URL url = new URL(LocalIpUtil.localRealIp(), config.getPort(), c.getName());
+            URL url = new URL(config.getAddress(), config.getPort(), c.getName());
+            url.putParameter("timestamp" , startTime + "");
             try {
                 registry.register(url);
             } catch (Exception e) {

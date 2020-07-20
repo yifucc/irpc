@@ -2,6 +2,7 @@ package com.ifcc.irpc.common.config;
 
 import com.ifcc.irpc.spi.annotation.Cell;
 
+import java.io.InputStream;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,10 +23,20 @@ public class PropertiesProvider implements IConfigProvider<Properties> {
     public Properties provide(String filePath) {
         return propertiesMap.computeIfAbsent(filePath, path -> {
             Properties props = new Properties();
+            InputStream inputStream = null;
             try {
-                props.load(this.getClass().getClassLoader().getResourceAsStream(filePath));
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(filePath);
+                props.load(inputStream);
             } catch (Exception e) {
                 e.printStackTrace();
+            } finally {
+                if (inputStream != null) {
+                    try {
+                        inputStream.close();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
             }
             return props;
         });
