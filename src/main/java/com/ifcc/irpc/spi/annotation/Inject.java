@@ -18,5 +18,4 @@ import java.lang.annotation.Target;
 @Documented
 public @interface Inject {
     String value() default "";
-    boolean singleton() default true;
 }

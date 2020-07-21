@@ -2,9 +2,11 @@ package com.ifcc.irpc.spi;
 
 import com.ifcc.irpc.annotation.IrpcFactory;
 import com.ifcc.irpc.common.config.IConfigProvider;
+import com.ifcc.irpc.spi.annotation.Cell;
 import com.ifcc.irpc.spi.annotation.Config;
 import com.ifcc.irpc.spi.annotation.ConfigSource;
 import com.ifcc.irpc.spi.annotation.Inject;
+import com.ifcc.irpc.spi.annotation.SPI;
 import com.ifcc.irpc.spi.factory.ExtensionFactory;
 import com.ifcc.irpc.utils.AnnotationUtil;
 import com.ifcc.irpc.utils.PlaceholderUtil;
@@ -37,14 +39,23 @@ public abstract class AbstractLoad<T> {
 
     private Map<String, Object> instances = new ConcurrentHashMap<>();
 
-    protected AbstractLoad() {}
+    private Class<T> type;
 
-    protected AbstractLoad(ExtensionFactory factory) {
+    protected AbstractLoad(Class<T> type) {
+        this.type = type;
+    }
+
+    protected AbstractLoad(ExtensionFactory factory, Class<T> type) {
         this.factory = factory;
+        this.type = type;
     }
 
     protected void setFactory(ExtensionFactory factory) {
         this.factory = factory;
+    }
+
+    protected Class<T> getType() {
+        return this.type;
     }
 
     @SuppressWarnings("unchecked")
@@ -92,7 +103,19 @@ public abstract class AbstractLoad<T> {
                 }
             }
             T instance = (T)clazz.newInstance();
-            instances.put(name, instance);
+            SPI spi = type.getAnnotation(SPI.class);
+            boolean isSingleton = true;
+            if (spi != null) {
+                isSingleton = spi.singleton();
+            } else {
+                Cell cell = type.getAnnotation(Cell.class);
+                if (cell != null) {
+                    isSingleton = cell.singleton();
+                }
+            }
+            if (isSingleton) {
+                instances.put(name, instance);
+            }
             // 依赖注入
             this.injectExtension(instance);
             this.initExtension(instance);

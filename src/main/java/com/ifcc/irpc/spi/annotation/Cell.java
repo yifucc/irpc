@@ -18,4 +18,5 @@ import java.lang.annotation.Target;
 @Documented
 public @interface Cell {
     String value() default "";
+    boolean singleton() default true;
 }

@@ -32,13 +32,13 @@ public class ExtensionLoad<T> extends AbstractLoad<T> {
      * value 实现类class
      */
 
-    private Class<T> interfaceClass;
+    // private Class<T> interfaceClass;
 
     private String defaultName;
 
     private ExtensionLoad(Class<T> interfaceClass) {
-        super();
-        this.interfaceClass = interfaceClass;
+        super(interfaceClass);
+        // this.interfaceClass = interfaceClass;
         ExtensionFactory factory = interfaceClass == ExtensionFactory.class? null : ExtensionLoad.getExtensionLoad(ExtensionFactory.class).getDefaultExtension();
         super.setFactory(factory);
     }
@@ -71,7 +71,7 @@ public class ExtensionLoad<T> extends AbstractLoad<T> {
 
    @Override
     protected Map<String, Class<?>> loadExtensionClass() {
-        SPI spi = interfaceClass.getAnnotation(SPI.class);
+        SPI spi = this.getType().getAnnotation(SPI.class);
         if (spi != null) {
             String name = spi.value();
             if (StringUtils.isNotBlank(name)) {
@@ -91,7 +91,7 @@ public class ExtensionLoad<T> extends AbstractLoad<T> {
     }
 
     private void loadDirectory(Map<String, Class<?>> classMap, String path) {
-        String fileName = path + interfaceClass.getName();
+        String fileName = path + this.getType().getName();
         ClassLoader classLoader = this.getClass().getClassLoader();
         try {
             Enumeration<URL> resources = classLoader.getResources(fileName);
