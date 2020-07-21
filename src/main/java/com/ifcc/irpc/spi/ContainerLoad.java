@@ -2,10 +2,11 @@ package com.ifcc.irpc.spi;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.ifcc.irpc.annotation.client.IrpcConsumer;
+import com.ifcc.irpc.annotation.IrpcFactory;
 import com.ifcc.irpc.common.ClassQueryBuilder;
 import com.ifcc.irpc.spi.annotation.Cell;
 import com.ifcc.irpc.spi.factory.ExtensionFactory;
+import com.ifcc.irpc.utils.AnnotationUtil;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;
@@ -39,8 +40,8 @@ public class ContainerLoad<T> extends AbstractLoad<T>{
     protected Map<String, Class<?>> loadExtensionClass() {
         Map<String, Class<?>> classMap = Maps.newHashMap();
         if (type.isInterface()) {
-            IrpcConsumer consumer = type.getAnnotation(IrpcConsumer.class);
-            if (consumer != null) {
+            IrpcFactory factory = AnnotationUtil.findAnnotation(type, IrpcFactory.class);
+            if (factory != null) {
                 classMap.put(type.getName(), type);
                 return classMap;
             }

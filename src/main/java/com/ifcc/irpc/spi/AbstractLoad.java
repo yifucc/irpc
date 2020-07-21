@@ -1,12 +1,12 @@
 package com.ifcc.irpc.spi;
 
-import com.ifcc.irpc.annotation.client.IrpcConsumer;
-import com.ifcc.irpc.client.wrapper.ProxyWrapper;
+import com.ifcc.irpc.annotation.IrpcFactory;
 import com.ifcc.irpc.common.config.IConfigProvider;
 import com.ifcc.irpc.spi.annotation.Config;
 import com.ifcc.irpc.spi.annotation.ConfigSource;
 import com.ifcc.irpc.spi.annotation.Inject;
 import com.ifcc.irpc.spi.factory.ExtensionFactory;
+import com.ifcc.irpc.utils.AnnotationUtil;
 import com.ifcc.irpc.utils.PlaceholderUtil;
 import org.apache.commons.lang3.StringUtils;
 
@@ -77,12 +77,14 @@ public abstract class AbstractLoad<T> {
         }
         try {
             if (clazz.isInterface()) {
-                IrpcConsumer consumer = clazz.getAnnotation(IrpcConsumer.class);
-                if (consumer != null) {
-                    ProxyWrapper<T> wrapper = new ProxyWrapper(clazz);
+                IrpcFactory factory = AnnotationUtil.findAnnotation(clazz, IrpcFactory.class);
+                if (factory != null) {
+                    Class<?> factoryClass = factory.factoryClass();
+                    Object wrapper = factoryClass.getConstructor(Class.class).newInstance(clazz);
                     this.injectExtension(wrapper);
                     this.initExtension(wrapper);
-                    T instance = wrapper.getObject();
+                    Method method = factoryClass.getDeclaredMethod("getObject");
+                    T instance = (T) method.invoke(wrapper);
                     instances.put(name, instance);
                     return instance;
                 } else {

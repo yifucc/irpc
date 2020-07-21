@@ -2,12 +2,15 @@ package test.com.ifcc.irpc.discovery;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.Lists;
+import com.ifcc.irpc.annotation.IrpcFactory;
+import com.ifcc.irpc.annotation.client.IrpcConsumer;
 import com.ifcc.irpc.common.URL;
 import com.ifcc.irpc.common.config.IConfigLoader;
 import com.ifcc.irpc.common.config.IConfigProvider;
 import com.ifcc.irpc.discovery.Discovery;
 import com.ifcc.irpc.spi.ExtensionLoad;
 import com.ifcc.irpc.spi.factory.ExtensionFactory;
+import com.ifcc.irpc.utils.AnnotationUtil;
 import com.ifcc.irpc.utils.ClassUtil;
 import com.ifcc.irpc.utils.LocalIpUtil;
 import lombok.SneakyThrows;
@@ -87,5 +90,14 @@ public class DiscoveryTest {
         System.out.println(System.getProperty("user.home"));
         String path = this.getClass().getClassLoader().getResource("irpc.properties").getPath();
         System.out.println(path);
+    }
+
+    @Test
+    void test5() {
+//        IrpcFactory factory = IrpcConsumer.class.getAnnotation(IrpcFactory.class);
+//        System.out.println(factory);
+
+        IrpcFactory annotation = AnnotationUtil.findAnnotation(IComsumer.class, IrpcFactory.class);
+        System.out.println(annotation);
     }
 }

@@ -1,7 +1,4 @@
-package com.ifcc.irpc.annotation.client;
-
-import com.ifcc.irpc.annotation.IrpcFactory;
-import com.ifcc.irpc.client.wrapper.ProxyWrapper;
+package com.ifcc.irpc.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -12,13 +9,14 @@ import java.lang.annotation.Target;
 
 /**
  * @author chenghaifeng
- * @date 2020-07-07
+ * @date 2020-07-20
  * @description
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
-@IrpcFactory(factoryClass = ProxyWrapper.class)
-public @interface IrpcConsumer {
+public @interface IrpcFactory {
+    Class<?> factoryClass();
+    Class<?>[] constructorParametersType() default {};
 }
