@@ -108,7 +108,7 @@ public abstract class AbstractLoad<T> {
             if (spi != null) {
                 isSingleton = spi.singleton();
             } else {
-                Cell cell = type.getAnnotation(Cell.class);
+                Cell cell = clazz.getAnnotation(Cell.class);
                 if (cell != null) {
                     isSingleton = cell.singleton();
                 }

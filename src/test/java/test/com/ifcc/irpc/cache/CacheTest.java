@@ -34,7 +34,10 @@ public class CacheTest {
         cache.setClearInterval(TimeUnit.SECONDS.toMillis(5));
         cache.put("name", "ifcc");
         System.out.println(cache.get("name"));
-        Thread.sleep(10 * 1000);
+        Thread.sleep(6 * 1000);
+        cache.put("age","26");
+        Thread.sleep(4 * 1000);
         System.out.println(cache.get("name"));
+        System.out.println(cache.get("age"));
     }
 }

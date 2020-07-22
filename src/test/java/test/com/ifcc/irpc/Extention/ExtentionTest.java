@@ -1,6 +1,7 @@
 package test.com.ifcc.irpc.Extention;
 
 import com.ifcc.irpc.common.Holder;
+import com.ifcc.irpc.common.config.IConfigProvider;
 import com.ifcc.irpc.common.config.IrpcConfig;
 import com.ifcc.irpc.spi.ExtensionLoad;
 import com.ifcc.irpc.spi.factory.ExtensionFactory;
@@ -16,8 +17,8 @@ public class ExtentionTest {
     @Test
     void test1() {
         ExtensionFactory factory = ExtensionLoad.getExtensionLoad(ExtensionFactory.class).getDefaultExtension();
-        Holder config1 = factory.getExtension(Holder.class);
-        Holder config2 = factory.getExtension(Holder.class);
+        IConfigProvider config1 = factory.getExtension(IConfigProvider.class, "properties");
+        IConfigProvider config2 = factory.getExtension(IConfigProvider.class, "properties");
         System.out.println(config1.equals(config2));
     }
 }
