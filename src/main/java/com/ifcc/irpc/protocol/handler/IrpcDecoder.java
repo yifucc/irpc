@@ -13,6 +13,8 @@ import java.util.List;
  * @description
  */
 public class IrpcDecoder extends ByteToMessageDecoder {
+    // 协议头字节数
+    private final static int FRAME_HEADER_LENGTH = 9;
 
     private Serialization serialization;
 
@@ -25,7 +27,7 @@ public class IrpcDecoder extends ByteToMessageDecoder {
 
     @Override
     protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) throws Exception {
-        if (byteBuf.readableBytes() < 9) {
+        if (byteBuf.readableBytes() < FRAME_HEADER_LENGTH) {
             return;
         }
         byteBuf.markReaderIndex();
@@ -39,8 +41,6 @@ public class IrpcDecoder extends ByteToMessageDecoder {
         byte reqType = byteBuf.readByte();
         // 压缩类型
         byte compressType = byteBuf.readByte();
-        // 请求id
-        long requestId = byteBuf.readLong();
         // 长度
         int length = byteBuf.readInt();
         // 保留字段
@@ -50,8 +50,17 @@ public class IrpcDecoder extends ByteToMessageDecoder {
         System.out.println(msgType);
         System.out.println(reqType);
         System.out.println(compressType);
-        System.out.println(requestId);
         System.out.println(length);
         System.out.println(reserved);
+        if (byteBuf.readableBytes() < length) {
+            byteBuf.resetReaderIndex();
+            return;
+        }
+        byte[] data = new byte[length];
+        // 将byteBuf中的数据读入data字节数组
+        byteBuf.readBytes(data);
+        Object obj = serialization.unMarshal(type, data);
+        list.add(obj);
+        System.out.println(obj);
     }
 }

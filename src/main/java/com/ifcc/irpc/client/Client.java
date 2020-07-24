@@ -1,5 +1,7 @@
 package com.ifcc.irpc.client;
 
+import com.ifcc.irpc.common.IrpcRequest;
+import com.ifcc.irpc.common.URL;
 import com.ifcc.irpc.spi.annotation.SPI;
 
 /**
@@ -9,4 +11,6 @@ import com.ifcc.irpc.spi.annotation.SPI;
  */
 @SPI("netty")
 public interface Client {
+    void connect(URL url);
+    void send(IrpcRequest request);
 }

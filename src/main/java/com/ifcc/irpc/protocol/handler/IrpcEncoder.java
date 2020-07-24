@@ -24,6 +24,11 @@ public class IrpcEncoder extends MessageToByteEncoder {
     protected void encode(ChannelHandlerContext channelHandlerContext, Object o, ByteBuf byteBuf) throws Exception {
         if(type != null && type.isInstance(o)) {
             byte[] bytes = serialization.marshal(o);
+            byteBuf.writeByte(11);
+            byteBuf.writeByte(1);
+            byteBuf.writeByte(0);
+            byteBuf.writeByte(0);
+            byteBuf.writeByte(0);
             byteBuf.writeInt(bytes.length);
             byteBuf.writeInt(0);
             byteBuf.writeBytes(bytes);
