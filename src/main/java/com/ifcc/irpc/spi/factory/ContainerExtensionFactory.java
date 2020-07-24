@@ -19,7 +19,7 @@ public class ContainerExtensionFactory implements ExtensionFactory {
             return null;
         }
         Object o = ContainerLoad.getContainerLoad(type).getExtension(name);
-        return (T) (o != null? o : ContainerLoad.getContainerLoad(type).getExtension(type.getName()));
+        return (T) (o != null? o : ContainerLoad.getContainerLoad(type).getExtension());
     }
 
     @Override
@@ -27,7 +27,7 @@ public class ContainerExtensionFactory implements ExtensionFactory {
         if (type.isInterface() && type.isAnnotationPresent(SPI.class)) {
             return null;
         }
-        return ContainerLoad.getContainerLoad(type).getExtension(type.getName());
+        return ContainerLoad.getContainerLoad(type).getExtension();
     }
 
 }

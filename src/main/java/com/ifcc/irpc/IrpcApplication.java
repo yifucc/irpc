@@ -6,6 +6,7 @@ import com.ifcc.irpc.common.ClassQueryBuilder;
 import com.ifcc.irpc.common.URL;
 import com.ifcc.irpc.common.config.IrpcConfig;
 import com.ifcc.irpc.registry.Registry;
+import com.ifcc.irpc.server.Server;
 import com.ifcc.irpc.spi.ExtensionLoad;
 import com.ifcc.irpc.spi.factory.ExtensionFactory;
 
@@ -30,14 +31,18 @@ public final class IrpcApplication {
         IrpcConfig config = extension.getExtension(IrpcConfig.class);
         // 启动时间
         long startTime = System.currentTimeMillis();
+        URL serverUrl = new URL(config.getAddress(), config.getPort());
         for (Class<?> c : classes) {
             URL url = new URL(config.getAddress(), config.getPort(), c.getName());
             url.putParameter("timestamp" , startTime + "");
             try {
                 registry.register(url);
+                serverUrl.getUrls().put(url.getService(), url);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
+        Server server = extension.getExtension(Server.class);
+        server.open(serverUrl);
     }
 }

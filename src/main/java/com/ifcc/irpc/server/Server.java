@@ -1,5 +1,6 @@
 package com.ifcc.irpc.server;
 
+import com.ifcc.irpc.common.URL;
 import com.ifcc.irpc.spi.annotation.SPI;
 
 /**
@@ -9,5 +10,5 @@ import com.ifcc.irpc.spi.annotation.SPI;
  */
 @SPI("netty")
 public interface Server {
-    void open();
+    void open(URL url);
 }

@@ -11,28 +11,31 @@ import lombok.Data;
 public class FrameHeader {
     /**
      * 魔数
+     * 611
      */
-    private byte magic;
+    private byte magic = (byte) 611;
     /**
      * 版本号
      */
-    private byte version;
+    private byte version = (byte)100;
     /**
      * 消息类型
+     * 0 一般请求
+     * 1 心跳
      */
     private byte msgType;
     /**
      * 请求类型
+     * 0 发送并接受响应
+     * 1 发送但不接受响应
      */
     private byte reqType;
     /**
      * 是否压缩
+     * 0 未压缩
+     * 1 压缩
      */
     private byte compressType;
-    /**
-     * 流id
-     */
-    private short streamId;
     /**
      * 长度
      */

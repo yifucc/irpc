@@ -1,0 +1,1 @@
+netty=com.ifcc.irpc.server.netty.NettyServer

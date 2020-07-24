@@ -76,6 +76,15 @@ public abstract class AbstractLoad<T> {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    public T getExtension() {
+        Map<String, Class<?>> extensionClasses = this.getExtensionClasses();
+        if(extensionClasses.size() != 1) {
+            throw new IllegalStateException("There more than one subclass or zero subclass of this interface: " + this.type);
+        }
+        return getExtension(extensionClasses.keySet().iterator().next());
+    }
+
     public Set<String> getSupportedExtensions() {
         return new TreeSet<>(getExtensionClasses().keySet());
     }

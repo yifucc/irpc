@@ -37,7 +37,7 @@ public class DiscoveryTest {
         URL ctx2 = new URL(LocalIpUtil.localRealIp(), "ifcc.irpc.test");
         try {
             discovery.discover(ctx);
-            //discovery.discover(ctx2);
+            discovery.discover(ctx2);
             new Runnable() {
 
                 @SneakyThrows

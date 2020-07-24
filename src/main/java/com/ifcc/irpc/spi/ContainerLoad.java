@@ -56,6 +56,8 @@ public class ContainerLoad<T> extends AbstractLoad<T>{
                     String name = this.getType().getName();
                     if (StringUtils.isNotBlank(cell.value())) {
                         name = cell.value();
+                    } else {
+                        name = clazz.getSimpleName();
                     }
                     classMap.put(name, clazz);
                 }
