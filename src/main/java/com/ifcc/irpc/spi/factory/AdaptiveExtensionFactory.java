@@ -3,6 +3,7 @@ package com.ifcc.irpc.spi.factory;
 import com.google.common.collect.Lists;
 import com.ifcc.irpc.spi.ExtensionLoad;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -45,5 +46,15 @@ public class AdaptiveExtensionFactory implements ExtensionFactory {
             }
         }
         return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> List<T> getAllExtension(Class<T> type) {
+        List result = new ArrayList();
+        for (ExtensionFactory factory : factories) {
+            result.addAll(factory.getAllExtension(type));
+        }
+        return result;
     }
 }

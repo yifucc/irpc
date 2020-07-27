@@ -14,6 +14,10 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -175,10 +179,19 @@ public abstract class AbstractLoad<T> {
                 Config config = field.getAnnotation(Config.class);
                 if(inject != null) {
                     Object injectValue = null;
-                    if (StringUtils.isNotBlank(inject.value())) {
+                    if (List.class.isAssignableFrom(field.getType())) {
+                        ParameterizedType genericType = (ParameterizedType) field.getGenericType();
+                        Class type = (Class)genericType.getActualTypeArguments()[0];
+                        injectValue = factory.getAllExtension(type);
+                    } else if (Set.class.isAssignableFrom(field.getType())) {
+                        ParameterizedType genericType = (ParameterizedType) field.getGenericType();
+                        Class type = (Class)genericType.getActualTypeArguments()[0];
+                        injectValue = new HashSet<>(factory.getAllExtension(type));
+                    } else if (StringUtils.isNotBlank(inject.value())) {
                         injectValue = factory.getExtension(field.getType(), inject.value());
                     } else {
-                        injectValue = factory.getExtension(field.getType());
+                        injectValue = factory.getExtension(field.getType(), field.getName());
+                        injectValue = injectValue != null? injectValue : factory.getExtension(field.getType());
                     }
                     field.setAccessible(true);
                     if (injectValue != null) {

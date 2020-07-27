@@ -3,6 +3,10 @@ package com.ifcc.irpc.spi.factory;
 import com.ifcc.irpc.spi.ContainerLoad;
 import com.ifcc.irpc.spi.annotation.SPI;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
 /**
  * @author chenghaifeng
  * @date 2020-07-01
@@ -28,6 +32,20 @@ public class ContainerExtensionFactory implements ExtensionFactory {
             return null;
         }
         return ContainerLoad.getContainerLoad(type).getExtension();
+    }
+
+    @Override
+    public <T> List<T> getAllExtension(Class<T> type) {
+        List<T> list = new ArrayList<>();
+        if (type.isInterface() && type.isAnnotationPresent(SPI.class)) {
+            return list;
+        }
+        ContainerLoad<T> load = ContainerLoad.getContainerLoad(type);
+        Set<String> supportedExtensions = load.getSupportedExtensions();
+        for (String name : supportedExtensions) {
+            list.add(load.getExtension(name));
+        }
+        return list;
     }
 
 }

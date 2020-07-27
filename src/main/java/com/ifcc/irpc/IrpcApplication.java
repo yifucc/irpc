@@ -9,6 +9,7 @@ import com.ifcc.irpc.registry.Registry;
 import com.ifcc.irpc.server.Server;
 import com.ifcc.irpc.spi.ExtensionLoad;
 import com.ifcc.irpc.spi.factory.ExtensionFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
 import java.util.Set;
@@ -18,6 +19,7 @@ import java.util.Set;
  * @date 2020-07-06
  * @description
  */
+@Slf4j
 public final class IrpcApplication {
     public static void run(Class<?> clazz, String[] args) {
         IrpcServer irpcServer = clazz.getAnnotation(IrpcServer.class);
@@ -26,6 +28,9 @@ public final class IrpcApplication {
                 .andAnnotationClass(IrpcProvider.class)
                 .andBasePackages(Arrays.asList(basePackages))
                 .toSet();
+        if (classes.size() <= 0) {
+            log.warn("There is no available service provider.");
+        }
         ExtensionFactory extension = ExtensionLoad.getExtensionLoad(ExtensionFactory.class).getDefaultExtension();
         Registry registry = extension.getExtension(Registry.class);
         IrpcConfig config = extension.getExtension(IrpcConfig.class);

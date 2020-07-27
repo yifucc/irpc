@@ -19,13 +19,11 @@ import java.util.concurrent.ConcurrentHashMap;
  * @description
  */
 public class ContainerLoad<T> extends AbstractLoad<T>{
-    private final static Map<Class<?>, ContainerLoad<?>> CONTAINER_LOAD_MAP = new ConcurrentHashMap<>();
 
-    //private Class<T> type;
+    private final static Map<Class<?>, ContainerLoad<?>> CONTAINER_LOAD_MAP = new ConcurrentHashMap<>();
 
     private ContainerLoad(Class<T> type) {
         super(ExtensionLoad.getExtensionLoad(ExtensionFactory.class).getDefaultExtension(), type);
-        //this.type = type;
     }
 
     @SuppressWarnings("unchecked")
@@ -57,7 +55,9 @@ public class ContainerLoad<T> extends AbstractLoad<T>{
                     if (StringUtils.isNotBlank(cell.value())) {
                         name = cell.value();
                     } else {
-                        name = clazz.getSimpleName();
+                        char[] chars = clazz.getSimpleName().toCharArray();
+                        chars[0] += 32;
+                        name = String.valueOf(chars);
                     }
                     classMap.put(name, clazz);
                 }
@@ -68,6 +68,10 @@ public class ContainerLoad<T> extends AbstractLoad<T>{
             if(cell != null) {
                 if (StringUtils.isNotBlank(cell.value())) {
                     name = cell.value();
+                } else {
+                    char[] chars = this.getType().getSimpleName().toCharArray();
+                    chars[0] += 32;
+                    name = String.valueOf(chars);
                 }
                 classMap.put(name, this.getType());
             }

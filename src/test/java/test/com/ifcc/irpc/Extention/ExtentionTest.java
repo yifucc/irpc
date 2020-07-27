@@ -21,4 +21,12 @@ public class ExtentionTest {
         IConfigProvider config2 = factory.getExtension(IConfigProvider.class, "properties");
         System.out.println(config1.equals(config2));
     }
+
+    @Test
+    void test2() {
+        ExtensionFactory factory = ExtensionLoad.getExtensionLoad(ExtensionFactory.class).getDefaultExtension();
+        Test2 test2 = factory.getExtension(Test2.class);
+        System.out.println(test2.list);
+        System.out.println(test2.test3);
+    }
 }

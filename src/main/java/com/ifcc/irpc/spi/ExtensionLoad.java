@@ -32,13 +32,10 @@ public class ExtensionLoad<T> extends AbstractLoad<T> {
      * value 实现类class
      */
 
-    // private Class<T> interfaceClass;
-
     private String defaultName;
 
     private ExtensionLoad(Class<T> interfaceClass) {
         super(interfaceClass);
-        // this.interfaceClass = interfaceClass;
         ExtensionFactory factory = interfaceClass == ExtensionFactory.class? null : ExtensionLoad.getExtensionLoad(ExtensionFactory.class).getDefaultExtension();
         super.setFactory(factory);
     }

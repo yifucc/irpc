@@ -65,7 +65,7 @@ public class NettyClient implements Client {
     private void connect(Bootstrap bootstrap, URL url, int retry) {
         ChannelFuture channelFuture = bootstrap.connect(url.getHost(), url.getPort()).addListener(future -> {
             if (future.isSuccess()) {
-                log.info("连接服务端成功");
+                log.info("Connect server successfully");
             } else if (retry == 0) {
                 log.error("重试次数已用完，放弃连接");
             } else {
@@ -73,7 +73,7 @@ public class NettyClient implements Client {
                 int order = (MAX_RETRY - retry) + 1;
                 //本次重连的间隔
                 int delay = 1 << order;
-                log.error("{} : 连接失败，第 {} 重连....", new Date(), order);
+                log.error("{} : 连接失败，第 {} 重连...", new Date(), order);
                 bootstrap.config().group().schedule(() -> {
                     try {
                         connect(bootstrap, url, retry - 1);
