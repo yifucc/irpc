@@ -7,6 +7,7 @@ import com.ifcc.irpc.common.URL;
 import com.ifcc.irpc.common.config.IrpcConfig;
 import com.ifcc.irpc.registry.Registry;
 import com.ifcc.irpc.server.Server;
+import com.ifcc.irpc.spi.ContainerLoad;
 import com.ifcc.irpc.spi.ExtensionLoad;
 import com.ifcc.irpc.spi.factory.ExtensionFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,7 @@ public final class IrpcApplication {
     public static void run(Class<?> clazz, String[] args) {
         IrpcServer irpcServer = clazz.getAnnotation(IrpcServer.class);
         String[] basePackages = irpcServer.scanBasePackages();
+        ContainerLoad.addBasePackages(Arrays.asList(basePackages));
         Set<Class<?>> classes = ClassQueryBuilder.build()
                 .andAnnotationClass(IrpcProvider.class)
                 .andBasePackages(Arrays.asList(basePackages))

@@ -9,6 +9,7 @@ import com.ifcc.irpc.spi.factory.ExtensionFactory;
 import com.ifcc.irpc.utils.AnnotationUtil;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,6 +20,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * @description
  */
 public class ContainerLoad<T> extends AbstractLoad<T>{
+
+    private static List<String> basePackages = Lists.newArrayList("com.ifcc.irpc");
 
     private final static Map<Class<?>, ContainerLoad<?>> CONTAINER_LOAD_MAP = new ConcurrentHashMap<>();
 
@@ -34,6 +37,10 @@ public class ContainerLoad<T> extends AbstractLoad<T>{
         return (ContainerLoad<T>) CONTAINER_LOAD_MAP.computeIfAbsent(type, ContainerLoad::new);
     }
 
+    public static void addBasePackages(List<String> basePackages) {
+        ContainerLoad.basePackages.addAll(basePackages);
+    }
+
     @Override
     protected Map<String, Class<?>> loadExtensionClass() {
         Map<String, Class<?>> classMap = Maps.newHashMap();
@@ -44,7 +51,7 @@ public class ContainerLoad<T> extends AbstractLoad<T>{
                 return classMap;
             }
             Set<Class<?>> classes = ClassQueryBuilder.build()
-                    .andBasePackages(Lists.newArrayList("com.ifcc.irpc"))
+                    .andBasePackages(basePackages)
                     .andInterfaceClass(this.getType())
                     .andAnnotationClass(Cell.class)
                     .toSet();
