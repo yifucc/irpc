@@ -2,6 +2,7 @@ package test.com.ifcc.irpc.discovery;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.ifcc.irpc.annotation.IrpcFactory;
 import com.ifcc.irpc.annotation.client.IrpcConsumer;
 import com.ifcc.irpc.common.URL;
@@ -64,7 +65,7 @@ public class DiscoveryTest {
     @Test
     void test2() {
 //        Set<Class<?>> classes = ClassUtil.getAllSubClass(IConfigLoader.class, "");
-        Set<Class<?>> set = ClassUtil.getAllClassByPackages(Lists.newArrayList("com"));
+        Set<Class<?>> set = ClassUtil.getAllClassByPackages(Sets.newHashSet("com"));
 //        Set<Class<?>> classes2 = ClassUtil.getAllSubClass(IConfigLoader.class, "com");
 //        ArrayList<Class<?>> list = new ArrayList<>();
         //ClassUtil.findClassJar("com.ifcc", IConfigProvider.class, list);

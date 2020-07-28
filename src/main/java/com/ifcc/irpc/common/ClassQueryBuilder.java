@@ -1,11 +1,10 @@
 package com.ifcc.irpc.common;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.ifcc.irpc.utils.ClassUtil;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Modifier;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -16,7 +15,7 @@ import java.util.stream.Stream;
  * @description
  */
 public class ClassQueryBuilder {
-    private List<String> basePackages;
+    private Set<String> basePackages;
     private Class<?> interfaceClass;
     private Class<? extends Annotation> annotationClass;
 
@@ -24,7 +23,7 @@ public class ClassQueryBuilder {
         return new ClassQueryBuilder();
     }
 
-    public ClassQueryBuilder andBasePackages(List<String> basePackages) {
+    public ClassQueryBuilder andBasePackages(Set<String> basePackages) {
         this.basePackages = basePackages;
         return this;
     }
@@ -41,7 +40,7 @@ public class ClassQueryBuilder {
 
     public Set<Class<?>> toSet() {
         if (basePackages == null) {
-            basePackages = Lists.newArrayList("com.ifcc.irpc");
+            basePackages = Sets.newHashSet("com.ifcc.irpc");
         }
         Set<Class<?>> set = ClassUtil.getAllClassByPackages(basePackages);
         Stream<Class<?>> stream = set.stream();

@@ -1,7 +1,7 @@
 package com.ifcc.irpc.spi;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.ifcc.irpc.annotation.IrpcFactory;
 import com.ifcc.irpc.common.ClassQueryBuilder;
 import com.ifcc.irpc.spi.annotation.Cell;
@@ -9,7 +9,6 @@ import com.ifcc.irpc.spi.factory.ExtensionFactory;
 import com.ifcc.irpc.utils.AnnotationUtil;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ContainerLoad<T> extends AbstractLoad<T>{
 
-    private static List<String> basePackages = Lists.newArrayList("com.ifcc.irpc");
+    private static Set<String> basePackages = Sets.newHashSet("com.ifcc.irpc");
 
     private final static Map<Class<?>, ContainerLoad<?>> CONTAINER_LOAD_MAP = new ConcurrentHashMap<>();
 
@@ -37,7 +36,7 @@ public class ContainerLoad<T> extends AbstractLoad<T>{
         return (ContainerLoad<T>) CONTAINER_LOAD_MAP.computeIfAbsent(type, ContainerLoad::new);
     }
 
-    public static void addBasePackages(List<String> basePackages) {
+    public static void addBasePackages(Set<String> basePackages) {
         ContainerLoad.basePackages.addAll(basePackages);
     }
 

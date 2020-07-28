@@ -1,5 +1,6 @@
 package com.ifcc.irpc;
 
+import com.google.common.collect.Sets;
 import com.ifcc.irpc.annotation.server.IrpcProvider;
 import com.ifcc.irpc.annotation.server.IrpcServer;
 import com.ifcc.irpc.common.ClassQueryBuilder;
@@ -25,10 +26,11 @@ public final class IrpcApplication {
     public static void run(Class<?> clazz, String[] args) {
         IrpcServer irpcServer = clazz.getAnnotation(IrpcServer.class);
         String[] basePackages = irpcServer.scanBasePackages();
-        ContainerLoad.addBasePackages(Arrays.asList(basePackages));
+        Set<String> base = Sets.newHashSet(basePackages);
+        ContainerLoad.addBasePackages(base);
         Set<Class<?>> classes = ClassQueryBuilder.build()
                 .andAnnotationClass(IrpcProvider.class)
-                .andBasePackages(Arrays.asList(basePackages))
+                .andBasePackages(base)
                 .toSet();
         if (classes.size() <= 0) {
             log.warn("There is no available service provider.");

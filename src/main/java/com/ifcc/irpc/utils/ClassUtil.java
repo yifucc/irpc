@@ -141,7 +141,7 @@ public class ClassUtil {
             basePackage = "com.ifcc.irpc";
         }
         Set<Class<?>> classes = Sets.newHashSet();
-        Set<Class<?>> packagesClasses = getAllClassByPackages(Lists.newArrayList(basePackage));
+        Set<Class<?>> packagesClasses = getAllClassByPackages(Sets.newHashSet(basePackage));
         for (Class<?> clazz : packagesClasses) {
             if(clazz == null) {
                 continue;
@@ -157,7 +157,7 @@ public class ClassUtil {
         return classes;
     }
 
-    public static Set<Class<?>> getAllClassByAnnotation(Class<? extends Annotation> annotationClass, List<String> basePackages) {
+    public static Set<Class<?>> getAllClassByAnnotation(Class<? extends Annotation> annotationClass, Set<String> basePackages) {
         Set<Class<?>> classes = Sets.newHashSet();
         Set<Class<?>> packagesClasses = getAllClassByPackages(basePackages);
         for (Class<?> clazz : packagesClasses) {
@@ -168,7 +168,7 @@ public class ClassUtil {
         return classes;
     }
 
-    public static Set<Class<?>> getAllClassByPackages(List<String> basePackages) {
+    public static Set<Class<?>> getAllClassByPackages(Set<String> basePackages) {
         Set<Class<?>> classes = Sets.newHashSet();
         for (String basePackage : basePackages) {
             classes.addAll(getAllClassByPackage(basePackage));
