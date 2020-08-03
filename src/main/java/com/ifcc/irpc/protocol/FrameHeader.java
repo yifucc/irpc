@@ -13,11 +13,11 @@ public class FrameHeader {
      * 魔数
      * 611
      */
-    private byte magic = (byte) 11;
+    private byte magic;
     /**
      * 版本号
      */
-    private byte version = (byte)1;
+    private byte version;
     /**
      * 消息类型
      * 0 一般请求
@@ -44,4 +44,5 @@ public class FrameHeader {
      * 保留字段
      */
     private int reserved;
+
 }

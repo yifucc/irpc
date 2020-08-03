@@ -33,8 +33,8 @@ public class IrpcProtocolTest {
     void test1() {
         ProtocolSerialization serialization = new ProtocolSerialization();
         IrpcRequest request = new IrpcRequest();
-        request.setService("/test");
-        request.setPayload(new IrpcRequest());
+//        request.setService("/test");
+//        request.setPayload(new IrpcRequest());
         byte[] bytes = serialization.marshal(request);
         System.out.println(bytes);
     }

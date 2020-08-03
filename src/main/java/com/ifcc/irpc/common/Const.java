@@ -5,32 +5,36 @@ package com.ifcc.irpc.common;
  * @date 2020-06-04
  * @description 常量
  */
-public class Const {
+public interface Const {
     // ================= zk相关常量 ================
     /**
      * 连接zk超时时间
      */
-    public static final int ZK_SESSION_TIMEOUT = 5000;
+    int ZK_SESSION_TIMEOUT = 5000;
     /**
      * 注册根节点
      */
-    public static final String ZK_REGISTRY_PATH = "/irpc";
+    String ZK_REGISTRY_PATH = "/irpc";
     /**
      * 生产者节点
      */
-    public static final String ZK_PROVIDERS_PATH = "/providers";
+    String ZK_PROVIDERS_PATH = "/providers";
     /**
      * 消费者节点
      */
-    public static final String ZK_CONSUMERS_PATH = "/consumers";
+    String ZK_CONSUMERS_PATH = "/consumers";
 
     // ================== 符号相关 ==================
     /**
      * 斜杆
      */
-    public static final String DIAGONAL = "/";
+    String DIAGONAL = "/";
     /**
      * 冒号
      */
-    public static final String COLON = ":";
+    String COLON = ":";
+
+    byte IRPC_VERSION = 1;
+
+    byte IRPC_MAGIC = 11;
 }

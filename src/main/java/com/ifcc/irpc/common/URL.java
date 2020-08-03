@@ -2,6 +2,7 @@ package com.ifcc.irpc.common;
 
 import com.google.common.collect.Maps;
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -62,5 +63,17 @@ public class URL implements Serializable {
             parameters = Maps.newHashMap();
         }
         return parameters.getOrDefault(key, defaultValue);
+    }
+
+    public String getParameter(String key) {
+        if (parameters == null) {
+            parameters = Maps.newHashMap();
+        }
+        return parameters.get(key);
+    }
+
+    public boolean hasParameter(String key) {
+        String value = getParameter(key);
+        return StringUtils.isNotBlank(value);
     }
 }

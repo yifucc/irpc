@@ -6,6 +6,7 @@ import com.ifcc.irpc.common.IrpcResponse;
 import com.ifcc.irpc.common.URL;
 import com.ifcc.irpc.protocol.handler.IrpcDecoder;
 import com.ifcc.irpc.protocol.handler.IrpcEncoder;
+import com.ifcc.irpc.protocol.handler.NettyServerHandler;
 import com.ifcc.irpc.server.Server;
 import com.ifcc.irpc.spi.annotation.Inject;
 import io.netty.bootstrap.ServerBootstrap;
@@ -47,6 +48,7 @@ public class NettyServer implements Server {
                         pipeline.addLast(new IrpcEncoder(IrpcResponse.class, serialization));
                         //添加解码器
                         pipeline.addLast(new IrpcDecoder(IrpcRequest.class, serialization));
+                        pipeline.addLast(new NettyServerHandler());
                     }
                 });
         bind(serverBootstrap, url.getPort());

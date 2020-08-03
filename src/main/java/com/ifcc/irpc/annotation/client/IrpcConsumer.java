@@ -21,4 +21,5 @@ import java.lang.annotation.Target;
 @Documented
 @IrpcFactory(factoryClass = ProxyWrapper.class)
 public @interface IrpcConsumer {
+    String targetName() default "";
 }

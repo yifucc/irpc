@@ -6,5 +6,5 @@ package com.ifcc.irpc.common;
  * @description
  */
 public interface Invoker {
-
+    Result invoke(Invocation invocation);
 }

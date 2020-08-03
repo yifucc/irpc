@@ -22,8 +22,8 @@ public class ClientTest {
         client.connect(url);
 //        Thread.sleep(5000);
         IrpcRequest request = new IrpcRequest();
-        request.setService("/test");
-        request.setMethod("getUsers");
+//        request.setService("/test");
+//        request.setMethod("getUsers");
         client.send(request);
         Thread.sleep(1000000);
     }
