@@ -1,6 +1,7 @@
 package test.com.ifcc.irpc.registry;
 
 import com.ifcc.irpc.common.URL;
+import com.ifcc.irpc.common.config.IrpcConfig;
 import com.ifcc.irpc.registry.Registry;
 import com.ifcc.irpc.spi.ExtensionLoad;
 import com.ifcc.irpc.spi.factory.ExtensionFactory;
@@ -30,5 +31,17 @@ public class RegistryTest {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Test
+    void test1() {
+        ExtensionFactory factory = ExtensionLoad.getExtensionLoad(ExtensionFactory.class).getDefaultExtension();
+        IrpcConfig config = factory.getExtension(IrpcConfig.class);
+        System.out.println(config);
+    }
+
+    @Test
+    void test2() throws NoSuchMethodException {
+        System.out.println(int.class.getConstructor(String.class));
     }
 }

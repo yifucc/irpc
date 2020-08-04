@@ -13,7 +13,6 @@ import com.ifcc.irpc.spi.ExtensionLoad;
 import com.ifcc.irpc.spi.factory.ExtensionFactory;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Arrays;
 import java.util.Set;
 
 /**
@@ -24,9 +23,14 @@ import java.util.Set;
 @Slf4j
 public final class IrpcApplication {
     public static void run(Class<?> clazz, String[] args) {
+        ExtensionFactory extension = ExtensionLoad.getExtensionLoad(ExtensionFactory.class).getDefaultExtension();
         IrpcServer irpcServer = clazz.getAnnotation(IrpcServer.class);
         String[] basePackages = irpcServer.scanBasePackages();
         Set<String> base = Sets.newHashSet(basePackages);
+        IrpcConfig config = extension.getExtension(IrpcConfig.class);
+        if (config.getScanBasePackages() != null) {
+            base.addAll(config.getScanBasePackages());
+        }
         ContainerLoad.addBasePackages(base);
         Set<Class<?>> classes = ClassQueryBuilder.build()
                 .andAnnotationClass(IrpcProvider.class)
@@ -35,9 +39,7 @@ public final class IrpcApplication {
         if (classes.size() <= 0) {
             log.warn("There is no available service provider.");
         }
-        ExtensionFactory extension = ExtensionLoad.getExtensionLoad(ExtensionFactory.class).getDefaultExtension();
         Registry registry = extension.getExtension(Registry.class);
-        IrpcConfig config = extension.getExtension(IrpcConfig.class);
         // 启动时间
         long startTime = System.currentTimeMillis();
         URL serverUrl = new URL(config.getAddress(), config.getPort());

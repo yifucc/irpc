@@ -9,9 +9,14 @@ import com.ifcc.irpc.spi.factory.ExtensionFactory;
 import com.ifcc.irpc.utils.AnnotationUtil;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * @author chenghaifeng
@@ -23,6 +28,21 @@ public class ContainerLoad<T> extends AbstractLoad<T>{
     private static Set<String> basePackages = Sets.newHashSet("com.ifcc.irpc");
 
     private final static Map<Class<?>, ContainerLoad<?>> CONTAINER_LOAD_MAP = new ConcurrentHashMap<>();
+
+    static {
+        InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream("irpc.properties");
+        Properties props = new Properties();
+        try {
+            props.load(stream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        String scanBasePackagesString = props.getProperty("irpc.scanBasePackages");
+        if (StringUtils.isNotBlank(scanBasePackagesString)) {
+            Set<String> basePackages = Arrays.stream(scanBasePackagesString.split(",")).map(String::trim).collect(Collectors.toSet());
+            addBasePackages(basePackages);
+        }
+    }
 
     private ContainerLoad(Class<T> type) {
         super(ExtensionLoad.getExtensionLoad(ExtensionFactory.class).getDefaultExtension(), type);

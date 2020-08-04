@@ -17,6 +17,6 @@ public class Test2 {
     @Inject
     List<Itest> list;
 
-    @Inject
+    @Inject("test")
     Itest test3;
 }

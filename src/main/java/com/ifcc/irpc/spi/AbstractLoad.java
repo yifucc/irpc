@@ -10,11 +10,13 @@ import com.ifcc.irpc.spi.annotation.SPI;
 import com.ifcc.irpc.spi.factory.ExtensionFactory;
 import com.ifcc.irpc.utils.AnnotationUtil;
 import com.ifcc.irpc.utils.PlaceholderUtil;
+import com.ifcc.irpc.utils.TypeUtil;
 import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +24,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * @author chenghaifeng
@@ -207,7 +210,17 @@ public abstract class AbstractLoad<T> {
                         continue;
                     }
                     field.setAccessible(true);
-                    if (field.getType().isAssignableFrom(int.class) || field.getType().isAssignableFrom(Integer.class)) {
+                    if (Set.class.isAssignableFrom(field.getType())) {
+                        ParameterizedType genericType = (ParameterizedType) field.getGenericType();
+                        Class realType = (Class)genericType.getActualTypeArguments()[0];
+                        Set set = Arrays.stream(value.split(",")).map(String::trim).map(s -> TypeUtil.getValue(s, realType)).collect(Collectors.toSet());
+                        field.set(instance, set);
+                    } else if (List.class.isAssignableFrom(field.getType())) {
+                        ParameterizedType genericType = (ParameterizedType) field.getGenericType();
+                        Class realType = (Class)genericType.getActualTypeArguments()[0];
+                        List<Object> list = Arrays.stream(value.split(",")).map(String::trim).map(s -> TypeUtil.getValue(s, realType)).collect(Collectors.toList());
+                        field.set(instance, list);
+                    } else if (field.getType().isAssignableFrom(int.class) || field.getType().isAssignableFrom(Integer.class)) {
                         field.set(instance, Integer.parseInt(value));
                     } else if (field.getType().isAssignableFrom(long.class) || field.getType().isAssignableFrom(Long.class)) {
                         field.set(instance, Long.parseLong(value));

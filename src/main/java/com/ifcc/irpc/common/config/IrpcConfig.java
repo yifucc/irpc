@@ -6,6 +6,8 @@ import com.ifcc.irpc.utils.LocalIpUtil;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Set;
+
 /**
  * @author chenghaifeng
  * @date 2020-06-05
@@ -65,6 +67,12 @@ public class IrpcConfig {
      */
     @Config("${irpc.registryAddress}")
     private String registryAddress;
+
+    /**
+     * 扫描包
+     */
+    @Config(value = "${irpc.scanBasePackages}", required = false)
+    private Set<String> scanBasePackages;
 
     public void init() {
         if (StringUtils.isBlank(address)) {

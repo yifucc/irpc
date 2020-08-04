@@ -2,10 +2,10 @@ package com.ifcc.irpc.client.netty;
 
 import com.ifcc.irpc.client.Client;
 import com.ifcc.irpc.codec.serialization.Serialization;
+import com.ifcc.irpc.common.AsyncResponse;
 import com.ifcc.irpc.common.Invocation;
 import com.ifcc.irpc.common.IrpcRequest;
 import com.ifcc.irpc.common.IrpcResponse;
-import com.ifcc.irpc.common.Result;
 import com.ifcc.irpc.common.URL;
 import com.ifcc.irpc.protocol.handler.IrpcDecoder;
 import com.ifcc.irpc.protocol.handler.IrpcEncoder;
@@ -102,7 +102,7 @@ public class NettyClient implements Client {
     }
 
     @Override
-    public Result send(final Invocation invocation) {
+    public AsyncResponse send(final Invocation invocation) {
         try {
             String requestId = RandomStringUtils.randomAlphanumeric(10);
             channel.writeAndFlush(invocation).await();
