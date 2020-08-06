@@ -10,8 +10,8 @@ import com.ifcc.irpc.spi.annotation.Cell;
 @Cell
 public class Provider implements Iprovider {
     @Override
-    public String hello(String name) {
+    public String hello() {
         System.out.println("hello");
-        return name;
+        return "hello";
     }
 }

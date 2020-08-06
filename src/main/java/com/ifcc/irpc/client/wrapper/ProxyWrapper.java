@@ -7,6 +7,7 @@ import com.ifcc.irpc.common.IrpcRequest;
 import com.ifcc.irpc.common.Result;
 import com.ifcc.irpc.common.URL;
 import com.ifcc.irpc.discovery.Discovery;
+import com.ifcc.irpc.exceptions.IrpcException;
 import com.ifcc.irpc.spi.annotation.Inject;
 import com.ifcc.irpc.utils.LocalIpUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -16,6 +17,7 @@ import java.io.FileInputStream;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -75,6 +77,7 @@ public class ProxyWrapper<T> {
         url = new URL(LocalIpUtil.localRealIp(), interfaceClass.getName());
         try {
             discovery.discover(url);
+            Thread.sleep(5000);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -90,8 +93,12 @@ public class ProxyWrapper<T> {
         return  (T)Proxy.newProxyInstance(interfaceClass.getClassLoader(), new Class[]{interfaceClass}, new InvocationHandler() {
             @Override
             public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                URL url = ProxyWrapper.this.url.getUrls().values().iterator().next();
-                Client client = clientFactory.getClient(url);
+                Map<String, URL> urls = ProxyWrapper.this.url.getUrls();
+                if(urls.isEmpty()) {
+                    throw new IrpcException("There is no available service provider.");
+                }
+                URL targetUrl = urls.values().iterator().next();
+                Client client = clientFactory.getClient(targetUrl);
                 IrpcRequest request = new IrpcRequest(interfaceClass.getName(), method.getName(), method.getParameterTypes(), args);
                 IrpcConsumer irpcConsumer = interfaceClass.getAnnotation(IrpcConsumer.class);
                 if (irpcConsumer != null && StringUtils.isNotBlank(irpcConsumer.targetName())) {
@@ -99,7 +106,7 @@ public class ProxyWrapper<T> {
                 }
                 Result result = client.send(request).get();
                 if (result.getException() != null) {
-                    throw new IllegalStateException(result.getException());
+                    throw result.getException();
                 }
                 return result.getValue();
             }

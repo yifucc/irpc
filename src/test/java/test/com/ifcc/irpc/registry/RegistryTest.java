@@ -41,7 +41,10 @@ public class RegistryTest {
     }
 
     @Test
-    void test2() throws NoSuchMethodException {
-        System.out.println(int.class.getConstructor(String.class));
+    void test2() throws ClassNotFoundException {
+        ExtensionFactory factory = ExtensionLoad.getExtensionLoad(ExtensionFactory.class).getDefaultExtension();
+        Class<?> clazz = Class.forName("test.com.ifcc.irpc.provider.Iprovider");
+        Object extension = factory.getExtension(clazz);
+
     }
 }

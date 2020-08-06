@@ -45,13 +45,6 @@ public class IrpcDecoder extends ByteToMessageDecoder {
         int length = byteBuf.readInt();
         // 保留字段
         int reserved = byteBuf.readInt();
-        System.out.println(magic);
-        System.out.println(version);
-        System.out.println(msgType);
-        System.out.println(reqType);
-        System.out.println(compressType);
-        System.out.println(length);
-        System.out.println(reserved);
         if (byteBuf.readableBytes() < length) {
             byteBuf.resetReaderIndex();
             return;
@@ -61,6 +54,5 @@ public class IrpcDecoder extends ByteToMessageDecoder {
         byteBuf.readBytes(data);
         Object obj = serialization.unMarshal(type, data);
         list.add(obj);
-        System.out.println(obj);
     }
 }
