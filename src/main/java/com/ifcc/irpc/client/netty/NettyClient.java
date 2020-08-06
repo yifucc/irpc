@@ -10,7 +10,9 @@ import com.ifcc.irpc.common.URL;
 import com.ifcc.irpc.protocol.handler.IrpcDecoder;
 import com.ifcc.irpc.protocol.handler.IrpcEncoder;
 import com.ifcc.irpc.protocol.handler.NettyClientHandler;
+import com.ifcc.irpc.spi.ExtensionLoad;
 import com.ifcc.irpc.spi.annotation.Inject;
+import com.ifcc.irpc.spi.factory.ExtensionFactory;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -23,6 +25,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
@@ -39,8 +42,9 @@ public class NettyClient implements Client {
     private Channel channel;
     private static final int MAX_RETRY = 5;
 
-    @Inject
     private Serialization serialization;
+
+    private ExtensionFactory factory = ExtensionLoad.getExtensionLoad(ExtensionFactory.class).getDefaultExtension();
 
     private NettyClientHandler handler;
 
@@ -50,6 +54,13 @@ public class NettyClient implements Client {
 
     @Override
     public void connect(URL url) {
+        String serializationName = url.getParameter("serialization");
+        if (StringUtils.isNotBlank(serializationName)) {
+            serialization = factory.getExtension(Serialization.class, serializationName);
+        }
+        if (serialization == null) {
+            serialization = factory.getExtension(Serialization.class);
+        }
         eventLoopGroup = new NioEventLoopGroup(1);
         //启动类
         Bootstrap bootstrap = new Bootstrap();
@@ -64,9 +75,9 @@ public class NettyClient implements Client {
                     protected void initChannel(SocketChannel ch) throws Exception {
                         ChannelPipeline pipeline = ch.pipeline();
                         //添加编码器
-                        pipeline.addLast(new IrpcEncoder(IrpcRequest.class, serialization));
+                        pipeline.addLast(new IrpcEncoder(IrpcRequest.class, NettyClient.this.serialization));
                         //添加解码器
-                        pipeline.addLast(new IrpcDecoder(IrpcResponse.class, serialization));
+                        pipeline.addLast(new IrpcDecoder(IrpcResponse.class, NettyClient.this.serialization));
                         pipeline.addLast(handler);
                     }
                 });

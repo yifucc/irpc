@@ -51,6 +51,7 @@ public final class IrpcApplication {
         for (Class<?> c : classes) {
             URL url = new URL(config.getAddress(), config.getPort(), c.getName());
             url.putParameter("timestamp" , startTime + "");
+            url.putParameter("serialization", config.getSerialization());
             try {
                 registry.register(url);
                 serverUrl.getUrls().put(url.getService(), url);

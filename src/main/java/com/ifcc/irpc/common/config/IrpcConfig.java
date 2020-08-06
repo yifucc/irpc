@@ -51,7 +51,7 @@ public class IrpcConfig {
     @Config("${irpc.client.timeout:2000}")
     private int timeout;
 
-    @Config("${irpc.client.serialization:protocol}")
+    @Config("${irpc.server.serialization:protocol}")
     private String serialization;
 
     // ============== 公共配置 ================
