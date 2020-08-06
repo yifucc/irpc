@@ -9,4 +9,5 @@ import com.ifcc.irpc.annotation.server.IrpcProvider;
  */
 @IrpcProvider
 public interface Iprovider {
+    String hello(String name);
 }

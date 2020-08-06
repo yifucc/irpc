@@ -1,5 +1,10 @@
 package com.ifcc.irpc.client.wrapper;
 
+import com.ifcc.irpc.annotation.client.IrpcConsumer;
+import com.ifcc.irpc.client.Client;
+import com.ifcc.irpc.client.ClientFactory;
+import com.ifcc.irpc.common.IrpcRequest;
+import com.ifcc.irpc.common.Result;
 import com.ifcc.irpc.common.URL;
 import com.ifcc.irpc.discovery.Discovery;
 import com.ifcc.irpc.spi.annotation.Inject;
@@ -26,11 +31,13 @@ public class ProxyWrapper<T> {
     @Inject
     private Discovery discovery;
 
+    @Inject
+    private ClientFactory clientFactory;
+
     public ProxyWrapper(Class<T> clazz) {
         this.interfaceClass = clazz;
     }
 
-    @SuppressWarnings("unchecked")
     public void init() {
         if (interfaceClass == null) {
             throw new IllegalArgumentException("Interface class cannot be null");
@@ -71,19 +78,31 @@ public class ProxyWrapper<T> {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        proxy = (T)Proxy.newProxyInstance(interfaceClass.getClassLoader(), new Class[]{interfaceClass}, new InvocationHandler() {
-            @Override
-            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                return null;
-            }
-        });
+        proxy = createProxy();
     }
 
     public T getObject() {
         return proxy;
     }
 
+    @SuppressWarnings("unchecked")
     private T createProxy() {
-        return null;
+        return  (T)Proxy.newProxyInstance(interfaceClass.getClassLoader(), new Class[]{interfaceClass}, new InvocationHandler() {
+            @Override
+            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                URL url = ProxyWrapper.this.url.getUrls().values().iterator().next();
+                Client client = clientFactory.getClient(url);
+                IrpcRequest request = new IrpcRequest(interfaceClass.getName(), method.getName(), method.getParameterTypes(), args);
+                IrpcConsumer irpcConsumer = interfaceClass.getAnnotation(IrpcConsumer.class);
+                if (irpcConsumer != null && StringUtils.isNotBlank(irpcConsumer.targetName())) {
+                    request.setTargetServiceName(irpcConsumer.targetName());
+                }
+                Result result = client.send(request).get();
+                if (result.getException() != null) {
+                    throw new IllegalStateException(result.getException());
+                }
+                return result.getValue();
+            }
+        });
     }
 }

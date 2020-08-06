@@ -34,6 +34,10 @@ public class IrpcRequest implements Invocation, Serializable {
         initParameterSignatures();
     }
 
+    public IrpcRequest(String serviceName, String methodName, Class<?>[] parameterTypes, Object[] arguments) {
+        this(null, serviceName, methodName, parameterTypes, arguments);
+    }
+
     public IrpcRequest() {}
 
     public IrpcRequest(String requestId, String serviceName, String methodName, Class<?>[] parameterTypes, Object[] arguments) {
