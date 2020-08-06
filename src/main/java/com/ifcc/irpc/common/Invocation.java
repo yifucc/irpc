@@ -11,6 +11,8 @@ public interface Invocation {
 
     String getRequestId();
 
+    void setRequestId(String requestId);
+
     String getTargetServiceName();
 
     String getServiceName();

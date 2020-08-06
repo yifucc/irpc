@@ -105,6 +105,7 @@ public class NettyClient implements Client {
     public AsyncResponse send(final Invocation invocation) {
         try {
             String requestId = RandomStringUtils.randomAlphanumeric(10);
+            invocation.setRequestId(requestId);
             channel.writeAndFlush(invocation).await();
             return handler.getResponse(requestId);
         } catch (InterruptedException e) {

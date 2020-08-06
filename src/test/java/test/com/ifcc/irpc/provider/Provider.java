@@ -11,6 +11,7 @@ import com.ifcc.irpc.spi.annotation.Cell;
 public class Provider implements Iprovider {
     @Override
     public String hello(String name) {
+        System.out.println("hello");
         return name;
     }
 }

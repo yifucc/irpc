@@ -81,6 +81,7 @@ public class IrpcRequest implements Invocation, Serializable {
         this.returnType = returnType;
     }
 
+    @Override
     public void setRequestId(String requestId) {
         this.requestId = requestId;
     }
