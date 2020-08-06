@@ -1,6 +1,6 @@
 package test.com.ifcc.irpc;
 
-import com.ifcc.irpc.IrpcApplication;
+import com.ifcc.irpc.boot.IrpcApplication;
 import com.ifcc.irpc.annotation.server.IrpcServer;
 
 /**

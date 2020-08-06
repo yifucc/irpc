@@ -36,6 +36,14 @@ public class ContainerLoad<T> extends AbstractLoad<T>{
             props.load(stream);
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            try {
+                if (stream!=null) {
+                    stream.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         String scanBasePackagesString = props.getProperty("irpc.scanBasePackages");
         if (StringUtils.isNotBlank(scanBasePackagesString)) {

@@ -1,4 +1,4 @@
-package com.ifcc.irpc;
+package com.ifcc.irpc.boot;
 
 import com.google.common.collect.Sets;
 import com.ifcc.irpc.annotation.server.IrpcProvider;
@@ -13,6 +13,9 @@ import com.ifcc.irpc.spi.ExtensionLoad;
 import com.ifcc.irpc.spi.factory.ExtensionFactory;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Set;
 
 /**
@@ -23,6 +26,8 @@ import java.util.Set;
 @Slf4j
 public final class IrpcApplication {
     public static void run(Class<?> clazz, String[] args) {
+        IrpcBanner banner = new IrpcBanner();
+        banner.printBanner();
         ExtensionFactory extension = ExtensionLoad.getExtensionLoad(ExtensionFactory.class).getDefaultExtension();
         IrpcServer irpcServer = clazz.getAnnotation(IrpcServer.class);
         String[] basePackages = irpcServer.scanBasePackages();
