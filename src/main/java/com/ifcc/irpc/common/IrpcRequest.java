@@ -1,6 +1,7 @@
 package com.ifcc.irpc.common;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -162,5 +163,28 @@ public class IrpcRequest implements Invocation, Serializable {
         if (!attachments.containsKey(key)) {
             attachments.put(key, value);
         }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof IrpcRequest)) {
+            return false;
+        }
+        IrpcRequest request = (IrpcRequest) obj;
+        return this.serviceName.equals(request.serviceName)
+                && this.methodName.equals(request.methodName)
+                && Arrays.equals(this.parameterTypes, request.parameterTypes)
+                && Arrays.equals(this.arguments, request.arguments);
+    }
+
+    @Override
+    public int hashCode() {
+        return this.serviceName.hashCode()
+                + this.methodName.hashCode()
+                + Arrays.hashCode(this.parameterTypes)
+                + Arrays.hashCode(this.arguments);
     }
 }

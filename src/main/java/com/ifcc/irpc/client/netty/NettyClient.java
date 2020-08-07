@@ -3,6 +3,7 @@ package com.ifcc.irpc.client.netty;
 import com.ifcc.irpc.client.Client;
 import com.ifcc.irpc.codec.serialization.Serialization;
 import com.ifcc.irpc.common.AsyncResponse;
+import com.ifcc.irpc.common.Const;
 import com.ifcc.irpc.common.Invocation;
 import com.ifcc.irpc.common.IrpcRequest;
 import com.ifcc.irpc.common.IrpcResponse;
@@ -11,7 +12,6 @@ import com.ifcc.irpc.protocol.handler.IrpcDecoder;
 import com.ifcc.irpc.protocol.handler.IrpcEncoder;
 import com.ifcc.irpc.protocol.handler.NettyClientHandler;
 import com.ifcc.irpc.spi.ExtensionLoad;
-import com.ifcc.irpc.spi.annotation.Inject;
 import com.ifcc.irpc.spi.factory.ExtensionFactory;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -44,17 +44,18 @@ public class NettyClient implements Client {
 
     private Serialization serialization;
 
-    private ExtensionFactory factory = ExtensionLoad.getExtensionLoad(ExtensionFactory.class).getDefaultExtension();
+    private ExtensionFactory factory;
 
     private NettyClientHandler handler;
 
     public NettyClient() {
         this.handler = new NettyClientHandler();
+        this.factory = ExtensionLoad.getExtensionLoad(ExtensionFactory.class).getDefaultExtension();
     }
 
     @Override
     public void connect(URL url) {
-        String serializationName = url.getParameter("serialization");
+        String serializationName = url.getParameter(Const.SERIALIZATION);
         if (StringUtils.isNotBlank(serializationName)) {
             serialization = factory.getExtension(Serialization.class, serializationName);
         }

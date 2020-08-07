@@ -25,6 +25,12 @@ public class ScheduledCache<K, V> implements Cache<K, V> {
         this.timeRecords = new ConcurrentLinkedQueue<ScheduledEntity<K>>();
     }
 
+    public ScheduledCache(Cache cache, long clearInterval) {
+        this.cache = cache;
+        this.clearInterval = clearInterval;
+        this.timeRecords = new ConcurrentLinkedQueue<ScheduledEntity<K>>();
+    }
+
     public void setClearInterval(long clearInterval) {
         this.clearInterval = clearInterval;
     }

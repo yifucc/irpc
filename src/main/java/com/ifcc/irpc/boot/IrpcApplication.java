@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import com.ifcc.irpc.annotation.server.IrpcProvider;
 import com.ifcc.irpc.annotation.server.IrpcServer;
 import com.ifcc.irpc.common.ClassQueryBuilder;
+import com.ifcc.irpc.common.Const;
 import com.ifcc.irpc.common.URL;
 import com.ifcc.irpc.common.config.IrpcConfig;
 import com.ifcc.irpc.registry.Registry;
@@ -13,9 +14,6 @@ import com.ifcc.irpc.spi.ExtensionLoad;
 import com.ifcc.irpc.spi.factory.ExtensionFactory;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Set;
 
 /**
@@ -50,8 +48,8 @@ public final class IrpcApplication {
         URL serverUrl = new URL(config.getAddress(), config.getPort());
         for (Class<?> c : classes) {
             URL url = new URL(config.getAddress(), config.getPort(), c.getName());
-            url.putParameter("timestamp" , startTime + "");
-            url.putParameter("serialization", config.getSerialization());
+            url.putParameter(Const.TIMESTAMP , startTime + "");
+            url.putParameter(Const.SERIALIZATION, config.getSerialization());
             try {
                 registry.register(url);
                 serverUrl.getUrls().put(url.getService(), url);

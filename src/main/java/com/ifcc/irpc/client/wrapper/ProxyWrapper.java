@@ -1,8 +1,12 @@
 package com.ifcc.irpc.client.wrapper;
 
 import com.ifcc.irpc.annotation.client.IrpcConsumer;
+import com.ifcc.irpc.cache.Cache;
+import com.ifcc.irpc.cache.decorators.ScheduledCache;
+import com.ifcc.irpc.cache.impl.IrpcCache;
 import com.ifcc.irpc.client.Client;
 import com.ifcc.irpc.client.ClientFactory;
+import com.ifcc.irpc.common.Invocation;
 import com.ifcc.irpc.common.IrpcRequest;
 import com.ifcc.irpc.common.Result;
 import com.ifcc.irpc.common.URL;
@@ -29,6 +33,7 @@ public class ProxyWrapper<T> {
     private Class<T> interfaceClass;
     private URL url;
     private T proxy;
+    private Cache<Invocation, Object> cache;
 
     @Inject
     private Discovery discovery;
@@ -38,6 +43,7 @@ public class ProxyWrapper<T> {
 
     public ProxyWrapper(Class<T> clazz) {
         this.interfaceClass = clazz;
+        this.cache = new ScheduledCache(new IrpcCache());
     }
 
     public void init() {
@@ -93,13 +99,17 @@ public class ProxyWrapper<T> {
         return  (T)Proxy.newProxyInstance(interfaceClass.getClassLoader(), new Class[]{interfaceClass}, new InvocationHandler() {
             @Override
             public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                IrpcRequest request = new IrpcRequest(interfaceClass.getName(), method.getName(), method.getParameterTypes(), args);
+                Object cache = getCache(request);
+                if (cache != null) {
+                    return cache;
+                }
                 Map<String, URL> urls = ProxyWrapper.this.url.getUrls();
                 if(urls.isEmpty()) {
                     throw new IrpcException("There is no available service provider.");
                 }
                 URL targetUrl = urls.values().iterator().next();
                 Client client = clientFactory.getClient(targetUrl);
-                IrpcRequest request = new IrpcRequest(interfaceClass.getName(), method.getName(), method.getParameterTypes(), args);
                 IrpcConsumer irpcConsumer = interfaceClass.getAnnotation(IrpcConsumer.class);
                 if (irpcConsumer != null && StringUtils.isNotBlank(irpcConsumer.targetName())) {
                     request.setTargetServiceName(irpcConsumer.targetName());
@@ -108,8 +118,23 @@ public class ProxyWrapper<T> {
                 if (result.getException() != null) {
                     throw result.getException();
                 }
+                putCache(request,result.getValue());
                 return result.getValue();
             }
         });
+    }
+
+    private Object getCache(IrpcRequest request) {
+        if (cache == null) {
+            return null;
+        }
+        return cache.get(request);
+    }
+
+    private void putCache(IrpcRequest request, Object value) {
+        if (cache == null) {
+            return;
+        }
+        cache.put(request, value);
     }
 }

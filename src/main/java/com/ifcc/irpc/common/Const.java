@@ -37,4 +37,8 @@ public interface Const {
     byte IRPC_VERSION = 1;
 
     byte IRPC_MAGIC = 11;
+
+    String SERIALIZATION = "serialization";
+
+    String TIMESTAMP = "timestamp";
 }
