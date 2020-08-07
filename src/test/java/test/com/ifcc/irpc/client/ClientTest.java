@@ -27,4 +27,11 @@ public class ClientTest {
         client.send(request);
         Thread.sleep(1000000);
     }
+
+    @Test
+    void test2() {
+        Long i = 1L;
+        int j =1;
+        System.out.println(i == j);
+    }
 }

@@ -6,10 +6,12 @@ import com.ifcc.irpc.cache.decorators.ScheduledCache;
 import com.ifcc.irpc.cache.impl.IrpcCache;
 import com.ifcc.irpc.client.Client;
 import com.ifcc.irpc.client.ClientFactory;
+import com.ifcc.irpc.common.Const;
 import com.ifcc.irpc.common.Invocation;
 import com.ifcc.irpc.common.IrpcRequest;
 import com.ifcc.irpc.common.Result;
 import com.ifcc.irpc.common.URL;
+import com.ifcc.irpc.common.config.IrpcConfig;
 import com.ifcc.irpc.discovery.Discovery;
 import com.ifcc.irpc.exceptions.IrpcException;
 import com.ifcc.irpc.spi.annotation.Inject;
@@ -41,9 +43,14 @@ public class ProxyWrapper<T> {
     @Inject
     private ClientFactory clientFactory;
 
+    @Inject
+    private IrpcConfig config;
+
     public ProxyWrapper(Class<T> clazz) {
         this.interfaceClass = clazz;
-        this.cache = new ScheduledCache(new IrpcCache());
+        if (config.getCacheTime() != Const.OFF_STATUS) {
+            this.cache = new ScheduledCache(new IrpcCache(), config.getCacheTime());
+        }
     }
 
     public void init() {

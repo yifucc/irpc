@@ -37,6 +37,9 @@ public class IrpcConfig {
     @Config(value = "${irpc.server.address}", required = false)
     private String address;
 
+    @Config("${irpc.server.serialization:protocol}")
+    private String serialization;
+
     // ============== 客户端配置 ===============
     /**
      * 远程调用重试次数
@@ -51,8 +54,13 @@ public class IrpcConfig {
     @Config("${irpc.client.timeout:2000}")
     private int timeout;
 
-    @Config("${irpc.server.serialization:protocol}")
-    private String serialization;
+    /**
+     * 客户端缓存，单位毫秒
+     * 默认3000
+     * -1表示不开启
+     */
+    @Config("${irpc.client.cache:3000}")
+    private long cacheTime;
 
     // ============== 公共配置 ================
 

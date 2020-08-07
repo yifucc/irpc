@@ -41,4 +41,6 @@ public interface Const {
     String SERIALIZATION = "serialization";
 
     String TIMESTAMP = "timestamp";
+
+    int OFF_STATUS = -1;
 }
