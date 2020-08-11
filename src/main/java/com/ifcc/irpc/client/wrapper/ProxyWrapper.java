@@ -107,6 +107,10 @@ public class ProxyWrapper<T> {
             @Override
             public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
                 IrpcRequest request = new IrpcRequest(interfaceClass.getName(), method.getName(), method.getParameterTypes(), args);
+                IrpcConsumer irpcConsumer = interfaceClass.getAnnotation(IrpcConsumer.class);
+                if (irpcConsumer != null && StringUtils.isNotBlank(irpcConsumer.targetName())) {
+                    request.setTargetServiceName(irpcConsumer.targetName());
+                }
                 Object cache = getCache(request);
                 if (cache != null) {
                     return cache;
@@ -115,12 +119,9 @@ public class ProxyWrapper<T> {
                 if(urls.isEmpty()) {
                     throw new IrpcException("There is no available service provider.");
                 }
+                // 负载均衡
                 URL targetUrl = urls.values().iterator().next();
                 Client client = clientFactory.getClient(targetUrl);
-                IrpcConsumer irpcConsumer = interfaceClass.getAnnotation(IrpcConsumer.class);
-                if (irpcConsumer != null && StringUtils.isNotBlank(irpcConsumer.targetName())) {
-                    request.setTargetServiceName(irpcConsumer.targetName());
-                }
                 Result result = client.send(request).get();
                 if (result.getException() != null) {
                     throw result.getException();

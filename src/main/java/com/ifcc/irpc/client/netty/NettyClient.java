@@ -48,6 +48,8 @@ public class NettyClient implements Client {
 
     private NettyClientHandler handler;
 
+    private URL url;
+
     public NettyClient() {
         this.handler = new NettyClientHandler();
         this.factory = ExtensionLoad.getExtensionLoad(ExtensionFactory.class).getDefaultExtension();
@@ -62,7 +64,8 @@ public class NettyClient implements Client {
         if (serialization == null) {
             serialization = factory.getExtension(Serialization.class);
         }
-        eventLoopGroup = new NioEventLoopGroup(1);
+        this.url = url;
+        this.eventLoopGroup = new NioEventLoopGroup(1);
         //启动类
         Bootstrap bootstrap = new Bootstrap();
         bootstrap.group(eventLoopGroup)
