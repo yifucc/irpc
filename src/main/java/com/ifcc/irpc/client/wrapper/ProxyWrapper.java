@@ -48,14 +48,14 @@ public class ProxyWrapper<T> {
 
     public ProxyWrapper(Class<T> clazz) {
         this.interfaceClass = clazz;
-        if (config.getCacheTime() != Const.OFF_STATUS) {
-            this.cache = new ScheduledCache(new IrpcCache(), config.getCacheTime());
-        }
     }
 
     public void init() {
         if (interfaceClass == null) {
             throw new IllegalArgumentException("Interface class cannot be null");
+        }
+        if (config.getCacheTime() != Const.OFF_STATUS) {
+            this.cache = new ScheduledCache(new IrpcCache(), config.getCacheTime());
         }
         String resolve = System.getProperty(interfaceClass.getName());
         String resolveFile = null;
